@@ -1,0 +1,16 @@
+{"level":"error","message":"llave duplicada viola restricción de unicidad «usuarios_correo_electronico_key» - POST /usuarios/register","service":"user-service"}
+{"level":"error","message":"Expected ',' or '}' after property value in JSON at position 20","service":"user-service"}
+{"level":"error","message":"Formato de archivo no permitido. Solo se permiten archivos JPEG o PNG.","service":"user-service"}
+{"level":"error","message":"no existe la columna «tipo_personalizacion» en la relación «solicitudes_personalizacion»","service":"user-service"}
+{"level":"error","message":"no existe la columna «tipo_personalizacion» en la relación «solicitudes_personalizacion»","service":"user-service"}
+{"level":"error","message":"no existe la columna «tipo_personalizacion» en la relación «solicitudes_personalizacion»","service":"user-service"}
+{"level":"error","message":"no existe la columna «tipo_personalizacion» en la relación «solicitudes_personalizacion»","service":"user-service"}
+{"level":"error","message":"no existe la columna «tipo_personalizacion» en la relación «solicitudes_personalizacion»","service":"user-service"}
+{"level":"error","message":"no existe la columna «tipo_personalizacion» en la relación «solicitudes_personalizacion»","service":"user-service"}
+{"level":"error","message":"no existe la columna «tipo_personalizacion» en la relación «solicitudes_personalizacion»","service":"user-service"}
+{"level":"error","message":"auditoriaModel.registrarAuditoria is not a function","service":"user-service"}
+{"level":"error","message":"auditoriaModel.registrarAuditoria is not a function","service":"user-service"}
+{"level":"error","message":"crypto.randomInt is not a function","service":"user-service"}
+{"level":"error","message":"Missing credentials for \"PLAIN\"","service":"user-service"}
+{"level":"error","message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-207945da9f3sm41206315ad.23 - gsmtp","service":"user-service"}
+{"level":"error","message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-207945da9absm41227425ad.51 - gsmtp","service":"user-service"}
