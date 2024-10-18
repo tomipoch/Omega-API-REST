@@ -14,3 +14,15 @@
 {"level":"error","message":"Missing credentials for \"PLAIN\"","service":"user-service"}
 {"level":"error","message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-207945da9f3sm41206315ad.23 - gsmtp","service":"user-service"}
 {"level":"error","message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-207945da9absm41227425ad.51 - gsmtp","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «nombre» de la relación «usuarios» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «nombre» de la relación «usuarios» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «nombre» de la relación «usuarios» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «nombre» de la relación «usuarios» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «nombre» de la relación «usuarios» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"fs is not defined","service":"user-service"}
+{"level":"error","message":"fs is not defined","service":"user-service"}
+{"level":"error","message":"path is not defined","service":"user-service"}
+{"level":"error","message":"path is not defined","service":"user-service"}
+{"level":"error","message":"path is not defined","service":"user-service"}
+{"level":"error","message":"usuariosModel.actualizarFotoPerfil is not a function","service":"user-service"}
+{"level":"error","message":"llave duplicada viola restricción de unicidad «usuarios_correo_electronico_key»","service":"user-service"}

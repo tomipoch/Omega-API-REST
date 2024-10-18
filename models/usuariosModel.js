@@ -1,20 +1,20 @@
 const pool = require('../db');
 
 // Registrar un nuevo usuario
-exports.registrarUsuario = async (nombre, correo_electronico, contrasena, rol_id) => {
+exports.registrarUsuario = async (nombre, apellido_paterno, apellido_materno, correo_electronico, contrasena, rol_id, foto_perfil_url) => {
     const query = `
-      INSERT INTO usuarios (nombre, correo_electronico, contrasena, rol_id)
-      VALUES ($1, $2, $3, $4) RETURNING usuario_id, nombre, correo_electronico, rol_id;
+      INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, correo_electronico, contrasena, rol_id, foto_perfil_url)
+      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id, foto_perfil_url;
     `;
-    const { rows } = await pool.query(query, [nombre, correo_electronico, contrasena, rol_id]);
+    const { rows } = await pool.query(query, [nombre, apellido_paterno, apellido_materno, correo_electronico, contrasena, rol_id, foto_perfil_url]);
     return rows[0];
-  };
+};
 
 // Obtener usuario por correo electrónico
 exports.obtenerUsuarioPorCorreo = async (correo_electronico) => {
-  const query = 'SELECT * FROM usuarios WHERE correo_electronico = $1';
+  const query = 'SELECT * FROM usuarios WHERE correo_electronico = $1'; // Asegúrate de que esto incluya `foto_perfil_url`
   const { rows } = await pool.query(query, [correo_electronico]);
-  return rows[0];
+  return rows[0]; // Asegúrate de que este objeto incluya `foto_perfil_url`
 };
 
 // Obtener usuario por ID
@@ -25,14 +25,14 @@ exports.obtenerUsuarioPorId = async (usuario_id) => {
 };
 
 // Actualizar perfil de usuario
-exports.actualizarUsuario = async (usuario_id, nombre, correo_electronico, telefono, direccion) => {
+exports.actualizarUsuario = async (usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, telefono, direccion, foto_perfil_url) => {
   const query = `
     UPDATE usuarios
-    SET nombre = $1, correo_electronico = $2, telefono = $3, direccion = $4
-    WHERE usuario_id = $5
-    RETURNING usuario_id, nombre, correo_electronico, telefono, direccion;
+    SET nombre = $1, apellido_paterno = $2, apellido_materno = $3, correo_electronico = $4, telefono = $5, direccion = $6, foto_perfil_url = $7
+    WHERE usuario_id = $8
+    RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, telefono, direccion, foto_perfil_url;
   `;
-  const { rows } = await pool.query(query, [nombre, correo_electronico, telefono, direccion, usuario_id]);
+  const { rows } = await pool.query(query, [nombre, apellido_paterno, apellido_materno, correo_electronico, telefono, direccion, foto_perfil_url, usuario_id]);
   return rows[0];
 };
 
@@ -42,6 +42,7 @@ exports.eliminarUsuario = async (usuario_id) => {
   const { rows } = await pool.query(query, [usuario_id]);
   return rows[0];
 };
+
 
 // Guardar el código de restablecimiento en la base de datos
 exports.guardarCodigoRestablecimiento = async (usuario_id, codigo, fechaExpiracion) => {
@@ -82,5 +83,18 @@ exports.marcarCodigoComoUsado = async (restablecimiento_id) => {
     WHERE restablecimiento_id = $1 RETURNING *;
   `;
   const { rows } = await pool.query(query, [restablecimiento_id]);
+  return rows[0];
+};
+
+// Actualizar la foto de perfil del usuario
+exports.actualizarFotoPerfil = async (usuario_id, foto_perfil_url) => {
+  console.log(`Actualizando foto de perfil para usuario ${usuario_id} con URL: ${foto_perfil_url}`); // Depuración
+  const query = `
+      UPDATE usuarios
+      SET foto_perfil_url = $1
+      WHERE usuario_id = $2
+      RETURNING usuario_id, foto_perfil_url;
+  `;
+  const { rows } = await pool.query(query, [foto_perfil_url, usuario_id]);
   return rows[0];
 };

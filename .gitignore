@@ -1,0 +1,8 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar carpeta de uploads
+uploads/
+
+# Ignorar archivo .env
+.env

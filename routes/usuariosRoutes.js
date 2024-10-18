@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const usuariosController = require('../controllers/usuariosController');
 const auth = require('../middleware/auth'); // Middleware de autenticación
+const upload = require('../middleware/multerConfig'); // Importar multer
 
 // Registro e inicio de sesión
 router.post('/register', usuariosController.registrarUsuario);
