@@ -26,3 +26,30 @@
 {"level":"error","message":"path is not defined","service":"user-service"}
 {"level":"error","message":"usuariosModel.actualizarFotoPerfil is not a function","service":"user-service"}
 {"level":"error","message":"llave duplicada viola restricción de unicidad «usuarios_correo_electronico_key»","service":"user-service"}
+{"level":"error","message":"codigo is not defined","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"Cannot destructure property 'id' of 'req.params' as it is undefined.","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «subtitulo» de la relación «secciones_blog» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «subtitulo» de la relación «secciones_blog» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «subtitulo» de la relación «secciones_blog» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «subtitulo» de la relación «secciones_blog» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «subtitulo» de la relación «secciones_blog» viola la restricción de no nulo","service":"user-service"}

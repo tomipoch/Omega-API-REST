@@ -1,20 +1,12 @@
-const usuariosModel = require('../models/usuariosModel');
+const usuariosModel = require('../models/usuariosModel'); // Importar modelo
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const auditoriaController = require('../controllers/auditoriaController');
 const upload = require('../middleware/multerConfig');
+const transporter = require('../middleware/transporter');
 const fs = require('fs');
 const path = require('path');
-
-// Configuración de NodeMailer para enviar correos
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER, // Tu email
-    pass: process.env.EMAIL_PASSWORD // Tu contraseña de email
-  }
-});
 
 // Registrar un nuevo usuario con imagen
 exports.registrarUsuario = async (req, res, next) => {
@@ -86,7 +78,7 @@ exports.iniciarSesion = async (req, res, next) => {
   try {
     const usuario = await usuariosModel.obtenerUsuarioPorCorreo(correo_electronico);
 
-    // Agregar un log para ver qué contiene el objeto `usuario`
+    // Log para depuración
     console.log('Usuario obtenido de la base de datos:', usuario);
 
     if (!usuario) {
@@ -105,17 +97,17 @@ exports.iniciarSesion = async (req, res, next) => {
       ? `${baseUrl}${usuario.foto_perfil_url}`
       : null;
 
-    // Otro log para verificar qué se envía al frontend
-    console.log('URL de la imagen enviada:', foto_perfil_url_completa);
-
+    // Enviar el token, nombre, foto y rol
     res.json({
       token,
       nombre: usuario.nombre,
       apellido_paterno: usuario.apellido_paterno,
       apellido_materno: usuario.apellido_materno,
       foto_perfil_url: foto_perfil_url_completa,
+      rol_id: usuario.rol_id, // Incluir el rol en la respuesta
     });
   } catch (error) {
+    console.error('Error en iniciarSesion:', error);
     next(error);
   }
 };
@@ -219,34 +211,47 @@ exports.solicitarRestablecimientoContrasena = async (req, res, next) => {
   const { correo_electronico } = req.body;
 
   try {
+    // Verificar si el usuario existe
     const usuario = await usuariosModel.obtenerUsuarioPorCorreo(correo_electronico);
     if (!usuario) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
 
+    // Generar el código de restablecimiento
     const codigo = generarCodigoRestablecimiento();
-    const fechaExpiracion = new Date(Date.now() + 15 * 60 * 1000);  // 15 minutos
 
+    // Establecer una fecha de expiración (15 minutos)
+    const fechaExpiracion = new Date(Date.now() + 15 * 60 * 1000);
+
+    // Guardar el código y la fecha de expiración en la base de datos
     await usuariosModel.guardarCodigoRestablecimiento(usuario.usuario_id, codigo, fechaExpiracion);
 
+    // Configurar el correo
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: correo_electronico,
-      subject: 'Código de Restablecimiento de Contraseña',
-      text: `Tu código de restablecimiento de contraseña es: ${codigo}. Tienes 15 minutos para usarlo.`
+      subject: 'Restablecimiento de Contraseña',
+      text: `Tu código de restablecimiento de contraseña es: ${codigo}. Tienes 15 minutos para usarlo.`,
     };
 
+    // Enviar el correo
     await transporter.sendMail(mailOptions);
 
-    await auditoriaController.registrarEvento(usuario.usuario_id, 'solicitud restablecimiento', `Se envió un código de restablecimiento a ${correo_electronico}.`);
+    // Registrar el evento en auditoría
+    await auditoriaController.registrarEvento(
+      usuario.usuario_id,
+      'solicitud restablecimiento',
+      `Se envió un código de restablecimiento a ${correo_electronico}.`
+    );
 
     res.json({ message: 'El código de restablecimiento ha sido enviado a tu correo.' });
   } catch (error) {
-    next(error);
+    console.error('Error al solicitar restablecimiento de contraseña:', error);
+    res.status(500).json({ message: 'Error interno del servidor.', error: error.message });
   }
 };
 
-// Función para generar un código de restablecimiento (6 dígitos)
+// Función para generar un código aleatorio de 6 dígitos
 const generarCodigoRestablecimiento = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
@@ -282,5 +287,43 @@ exports.restablecerContrasena = async (req, res, next) => {
     res.json({ message: 'Contraseña restablecida con éxito.' });
   } catch (error) {
     next(error);
+  }
+};
+
+exports.obtenerTodosLosUsuarios = async (req, res) => {
+  try {
+    console.log("Usuario autenticado:", { userId: req.userId, userRol: req.userRol }); // Log
+    const { nombre, rol } = req.query;
+
+    const usuarios = await usuariosModel.obtenerTodosLosUsuarios({
+      nombre: nombre || "",
+      rol: rol || null,
+    });
+
+    res.status(200).json({
+      message: "Usuarios obtenidos con éxito",
+      data: usuarios,
+    });
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
+
+// Eliminar un usuario por ID
+exports.eliminarUsuario = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const usuarioEliminado = await usuariosModel.eliminarUsuarioPorId(id);
+
+    if (!usuarioEliminado) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+
+    res.json({ message: 'Usuario eliminado con éxito.' });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error); // Log del error
+    res.status(500).json({ message: 'Error al eliminar usuario.' });
   }
 };
