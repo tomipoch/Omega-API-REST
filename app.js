@@ -11,6 +11,7 @@ const eventosRoutes = require('./routes/eventosRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const testimoniosRoutes = require('./routes/testimoniosRoutes');
 const personalizacionRoutes = require('./routes/personalizacionRoutes');  // Rutas de solicitud personalización
+const serviciosRoutes = require('./routes/serviciosRoutes');
 const faqRoutes = require('./routes/faqRoutes');  // Rutas de preguntas frecuentes
 const errorHandler = require('./middleware/errorHandler');
 
@@ -45,6 +46,7 @@ app.use('/blog', blogRoutes);
 app.use('/testimonios', testimoniosRoutes);
 app.use('/faq', faqRoutes);
 app.use('/personalizacion', personalizacionRoutes);
+app.use('/servicios', serviciosRoutes);
 
 // Ruta para verificar si el servidor está activo
 app.get('/ping', (req, res) => {

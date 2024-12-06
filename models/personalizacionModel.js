@@ -1,20 +1,33 @@
 const pool = require('../db');
 
-// Crear una nueva solicitud de personalización con imágenes
-exports.crearSolicitud = async (usuario_id, servicio_id, detalles, imagenes) => {
+// Crear una nueva solicitud de personalización
+exports.crearSolicitud = async (usuario_id, servicio_id, detalles) => {
     const query = `
-      INSERT INTO solicitudes_personalizacion (usuario_id, servicio_id, detalles, imagen_url)
-      VALUES ($1, $2, $3, $4) RETURNING *;
+      INSERT INTO solicitudes_personalizacion (usuario_id, servicio_id, detalles)
+      VALUES ($1, $2, $3) RETURNING *;
     `;
-    const { rows } = await pool.query(query, [usuario_id, servicio_id, detalles, imagenes]);
+    const { rows } = await pool.query(query, [usuario_id, servicio_id, detalles]);
     return rows[0];
 };
-  
+
+// Agregar una imagen asociada a una solicitud
+exports.agregarImagen = async (solicitud_id, imagen_url) => {
+  const query = `
+    INSERT INTO solicitudes_imagenes (solicitud_id, imagen_url)
+    VALUES ($1, $2) RETURNING *;
+  `;
+  const { rows } = await pool.query(query, [solicitud_id, imagen_url]);
+  return rows[0];
+};
+
 // Obtener todas las solicitudes de personalización (solo para admin)
 exports.obtenerSolicitudes = async () => {
     const query = `
-        SELECT * FROM solicitudes_personalizacion
-        ORDER BY fecha_solicitud DESC;
+        SELECT sp.*, array_agg(si.imagen_url) AS imagenes
+        FROM solicitudes_personalizacion sp
+        LEFT JOIN solicitudes_imagenes si ON sp.solicitud_id = si.solicitud_id
+        GROUP BY sp.solicitud_id
+        ORDER BY sp.fecha_solicitud DESC;
     `;
     const { rows } = await pool.query(query);
     return rows;
