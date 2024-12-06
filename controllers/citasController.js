@@ -21,10 +21,15 @@ exports.obtenerCitas = async (req, res, next) => {
   }
 };
 
-// Actualizar una cita
 exports.actualizarCita = async (req, res, next) => {
-  const { fecha_hora, servicio_id, estado_id, notas } = req.body;
+  let { fecha_hora, servicio_id, estado_id, notas } = req.body;
   const { id } = req.params;
+
+  // Si fecha_hora no se envía, asigna la fecha/hora actual (o cualquier otro valor predeterminado)
+  if (!fecha_hora) {
+    fecha_hora = new Date().toISOString(); // Fecha/hora actual en formato ISO
+  }
+
   try {
     const cita = await citasModel.actualizarCita(req.userId, id, fecha_hora, servicio_id, estado_id, notas);
     if (!cita) {

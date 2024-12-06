@@ -21,12 +21,19 @@ exports.obtenerCitas = async (usuarioId) => {
 // Actualizar una cita
 exports.actualizarCita = async (usuarioId, citaId, fecha_hora, servicio_id, estado_id, notas) => {
   const query = `
-    UPDATE citas SET fecha_hora = $1, servicio_id = $2, estado_id = $3, notas = $4
-    WHERE cita_id = $5 AND usuario_id = $6 RETURNING *;
+    UPDATE citas 
+    SET 
+      fecha_hora = COALESCE($1, NOW()), -- Usa NOW() si $1 es nulo
+      servicio_id = $2, 
+      estado_id = $3, 
+      notas = $4
+    WHERE 
+      cita_id = $5 AND usuario_id = $6 
+    RETURNING *;
   `;
   const values = [fecha_hora, servicio_id, estado_id, notas, citaId, usuarioId];
   const { rows } = await pool.query(query, values);
-  return rows[0];
+  return rows[0];
 };
 
 // Eliminar una cita
