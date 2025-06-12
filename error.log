@@ -53,3 +53,34 @@
 {"level":"error","message":"el valor nulo en la columna «subtitulo» de la relación «secciones_blog» viola la restricción de no nulo","service":"user-service"}
 {"level":"error","message":"el valor nulo en la columna «subtitulo» de la relación «secciones_blog» viola la restricción de no nulo","service":"user-service"}
 {"level":"error","message":"el valor nulo en la columna «subtitulo» de la relación «secciones_blog» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
+{"level":"error","message":"No se pudo registrar el evento de auditoría","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"","service":"user-service"}
+{"level":"error","message":"no existe la columna «apellido_paterno»","service":"user-service"}
+{"level":"error","message":"no existe la columna «apellido_paterno»","service":"user-service"}
+{"level":"error","message":"no existe la columna «apellido_paterno»","service":"user-service"}
+{"level":"error","message":"no existe la columna «apellido_paterno»","service":"user-service"}
+{"level":"error","message":"no existe la columna «apellido_paterno»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"la sintaxis de entrada no es válida para tipo integer: «Juan»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
