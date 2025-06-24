@@ -3,6 +3,9 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 
+// Configurar dotenv para cargar las variables de entorno
+dotenv.config();
+
 // Importar rutas
 const usuariosRoutes = require('./routes/usuariosRoutes');
 const citasRoutes = require('./routes/citasRoutes');
@@ -12,6 +15,7 @@ const testimoniosRoutes = require('./routes/testimoniosRoutes');
 const personalizacionRoutes = require('./routes/personalizacionRoutes');  // Rutas de solicitud personalización
 const serviciosRoutes = require('./routes/serviciosRoutes');
 const faqRoutes = require('./routes/faqRoutes');  // Rutas de preguntas frecuentes
+const disponibilidadRoutes = require('./routes/disponibilidadRoutes');  // Rutas de disponibilidad
 const errorHandler = require('./middleware/errorHandler');
 
 dotenv.config();
@@ -42,6 +46,7 @@ app.use('/testimonios', testimoniosRoutes);
 app.use('/faq', faqRoutes);
 app.use('/personalizacion', personalizacionRoutes);
 app.use('/servicios', serviciosRoutes);
+app.use('/disponibilidad', disponibilidadRoutes);  // Nueva ruta para disponibilidad
 
 // Ruta para verificar si el servidor está activo
 app.get('/ping', (req, res) => {
