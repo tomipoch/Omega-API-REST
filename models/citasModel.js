@@ -18,6 +18,18 @@ exports.obtenerCitas = async (usuarioId) => {
   return rows;
 };
 
+// Obtener TODAS las citas con el nombre del cliente (para el admin)
+exports.obtenerTodasLasCitas = async () => {
+  const query = `
+    SELECT c.*, u.nombre AS cliente_nombre
+    FROM citas c
+    JOIN usuarios u ON c.usuario_id = u.usuario_id
+    ORDER BY c.fecha_hora DESC
+  `;
+  const { rows } = await pool.query(query);
+  return rows;
+};
+
 // Actualizar una cita
 exports.actualizarCita = async (usuarioId, citaId, fecha_hora, servicio_id, estado_id, notas) => {
   const query = `
@@ -35,7 +47,6 @@ exports.actualizarCita = async (usuarioId, citaId, fecha_hora, servicio_id, esta
   const { rows } = await pool.query(query, values);
   return rows[0];
 };
-
 
 // Eliminar una cita
 exports.eliminarCita = async (usuarioId, citaId) => {

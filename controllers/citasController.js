@@ -56,3 +56,15 @@ exports.eliminarCita = async (req, res, next) => {
     next(error);
   }
 };
+
+// Obtener TODAS las citas (para el admin)
+exports.obtenerTodasLasCitas = async (req, res, next) => {
+  try {
+    const citas = await citasModel.obtenerTodasLasCitas();
+    res.json(citas);
+  } catch (error) {
+    next(error);
+  }
+};
+
+

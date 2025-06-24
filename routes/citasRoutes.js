@@ -8,4 +8,5 @@ router.get('/', auth, citasController.obtenerCitas);
 router.put('/:id', auth, citasController.actualizarCita);
 router.delete('/:id', auth, citasController.eliminarCita);
 
+router.get('/admin', auth, citasController.obtenerTodasLasCitas);
 module.exports = router;
