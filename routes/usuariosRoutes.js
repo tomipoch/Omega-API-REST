@@ -7,7 +7,10 @@ const upload = require('../middleware/multerConfig'); // Importar multer
 
 // Registro e inicio de sesión
 router.post('/register', usuariosController.registrarUsuario);
-router.post('/login', usuariosController.iniciarSesion);
+router.post('/login', (req, res, next) => {
+  console.log('LOGIN ROUTE HIT:', req.body);
+  usuariosController.iniciarSesion(req, res, next);
+});
 
 // Perfil de usuario autenticado
 router.get('/perfil', auth, usuariosController.obtenerPerfil);
@@ -20,6 +23,8 @@ router.post('/restablecer', usuariosController.restablecerContrasena);// Ruta pa
 
 // Obtener todos los usuarios con filtros
 router.get('/all', auth, verificarRolAdmin, usuariosController.obtenerTodosLosUsuarios);
-router.delete('/:id', auth, usuariosController.eliminarUsuario);
+router.delete('/:id', auth, verificarRolAdmin, usuariosController.eliminarUsuario);
+router.put('/:id/role', auth, verificarRolAdmin, usuariosController.actualizarRolUsuario);
+router.put('/:id', auth, verificarRolAdmin, usuariosController.actualizarUsuarioAdmin);
 
 module.exports = router;

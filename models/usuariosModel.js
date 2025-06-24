@@ -104,6 +104,8 @@ exports.actualizarFotoPerfil = async (usuario_id, foto_perfil_url) => {
 
 exports.obtenerTodosLosUsuarios = async (filtros) => {
   const { nombre, rol } = filtros;
+  
+  console.log("Filtros en modelo:", { nombre, rol }); // Debug
 
   let query = `
     SELECT usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id, foto_perfil_url
@@ -112,17 +114,24 @@ exports.obtenerTodosLosUsuarios = async (filtros) => {
   `;
   const params = [];
 
-  if (nombre) {
+  if (nombre && nombre.trim() !== '') {
     query += ` AND (LOWER(nombre) LIKE $${params.length + 1} OR LOWER(apellido_paterno) LIKE $${params.length + 1})`;
     params.push(`%${nombre.toLowerCase()}%`);
   }
 
-  if (rol) {
-    query += ` AND rol_id = $${params.length + 1}`;
-    params.push(rol);
+  if (rol && rol !== 'all') {
+    if (rol === 'null') {
+      query += ` AND rol_id IS NULL`;
+    } else {
+      query += ` AND rol_id = $${params.length + 1}`;
+      params.push(parseInt(rol));
+    }
   }
 
   query += ` ORDER BY usuario_id`;
+
+  console.log("Query final:", query); // Debug
+  console.log("Parámetros:", params); // Debug
 
   const { rows } = await pool.query(query, params);
   return rows;
@@ -138,5 +147,61 @@ exports.eliminarUsuarioPorId = async (usuario_id) => {
   } catch (error) {
     console.error('Error en eliminarUsuarioPorId:', error); // Log del error en el modelo
     throw error; // Re-lanzar el error para que el controlador lo maneje
+  }
+};
+
+// Actualizar rol de usuario
+exports.actualizarRolUsuario = async (usuario_id, rol_id) => {
+  try {
+    const query = 'UPDATE usuarios SET rol_id = $1 WHERE usuario_id = $2 RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id';
+    const { rows } = await pool.query(query, [rol_id, usuario_id]);
+
+    return rows[0]; // Devuelve el usuario actualizado o `undefined` si no existe
+  } catch (error) {
+    console.error('Error en actualizarRolUsuario:', error);
+    throw error;
+  }
+};
+
+// Actualizar datos de usuario (para admin)
+exports.actualizarUsuarioAdmin = async (usuario_id, datosActualizacion) => {
+  try {
+    // Construir la query dinámicamente según los campos proporcionados
+    const campos = [];
+    const valores = [];
+    let contador = 1;
+
+    // Solo agregar campos que no sean undefined o null
+    Object.keys(datosActualizacion).forEach(campo => {
+      if (datosActualizacion[campo] !== undefined && datosActualizacion[campo] !== null) {
+        campos.push(`${campo} = $${contador}`);
+        valores.push(datosActualizacion[campo]);
+        contador++;
+      }
+    });
+
+    if (campos.length === 0) {
+      throw new Error('No hay campos para actualizar');
+    }
+
+    // Agregar el usuario_id al final
+    valores.push(usuario_id);
+
+    const query = `
+      UPDATE usuarios 
+      SET ${campos.join(', ')} 
+      WHERE usuario_id = $${contador} 
+      RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, telefono, direccion, rol_id, fecha_registro, foto_perfil_url
+    `;
+
+    console.log('Query actualizarUsuarioAdmin:', query);
+    console.log('Valores:', valores);
+
+    const { rows } = await pool.query(query, valores);
+
+    return rows[0]; // Devuelve el usuario actualizado o `undefined` si no existe
+  } catch (error) {
+    console.error('Error en actualizarUsuarioAdmin:', error);
+    throw error;
   }
 };

@@ -73,10 +73,14 @@ exports.registrarUsuario = async (req, res, next) => {
 
 // Iniciar sesión
 exports.iniciarSesion = async (req, res, next) => {
-  const { correo_electronico, contrasena } = req.body;
+  const { correo_electronico, email, contrasena, password } = req.body;
+  const emailToUse = correo_electronico || email; // Acepta ambos formatos
+  const passwordToUse = contrasena || password; // Acepta ambos formatos
+
+  console.log('Datos recibidos:', { correo_electronico, email, contrasena: '***', password: '***', emailToUse, passwordToUse: '***' });
 
   try {
-    const usuario = await usuariosModel.obtenerUsuarioPorCorreo(correo_electronico);
+    const usuario = await usuariosModel.obtenerUsuarioPorCorreo(emailToUse);
 
     // Log para depuración
     console.log('Usuario obtenido de la base de datos:', usuario);
@@ -85,12 +89,12 @@ exports.iniciarSesion = async (req, res, next) => {
       return res.status(400).json({ message: 'Usuario no encontrado.' });
     }
 
-    const esValido = await bcrypt.compare(contrasena, usuario.contrasena);
+    const esValido = await bcrypt.compare(passwordToUse, usuario.contrasena);
     if (!esValido) {
       return res.status(400).json({ message: 'Contraseña incorrecta.' });
     }
 
-    const token = jwt.sign({ userId: usuario.usuario_id, rol: usuario.rol_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ user: { id: usuario.usuario_id }, rol: Number(usuario.rol_id) }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     const baseUrl = `http://localhost:4000`;
     const foto_perfil_url_completa = usuario.foto_perfil_url
@@ -100,11 +104,12 @@ exports.iniciarSesion = async (req, res, next) => {
     // Enviar el token, nombre, foto y rol
     res.json({
       token,
+      usuario_id: usuario.usuario_id,//AGREGAR USUARIO ID
       nombre: usuario.nombre,
       apellido_paterno: usuario.apellido_paterno,
       apellido_materno: usuario.apellido_materno,
       foto_perfil_url: foto_perfil_url_completa,
-      rol_id: usuario.rol_id, // Incluir el rol en la respuesta
+      rol_id: Number(usuario.rol_id), // Convertir a número
     });
   } catch (error) {
     console.error('Error en iniciarSesion:', error);
@@ -295,6 +300,8 @@ exports.obtenerTodosLosUsuarios = async (req, res) => {
     console.log("Usuario autenticado:", { userId: req.userId, userRol: req.userRol }); // Log
     const { nombre, rol } = req.query;
 
+    console.log("Filtros recibidos:", { nombre, rol }); // Debug
+
     const usuarios = await usuariosModel.obtenerTodosLosUsuarios({
       nombre: nombre || "",
       rol: rol || null,
@@ -325,5 +332,101 @@ exports.eliminarUsuario = async (req, res) => {
   } catch (error) {
     console.error('Error al eliminar usuario:', error); // Log del error
     res.status(500).json({ message: 'Error al eliminar usuario.' });
+  }
+};
+
+// Actualizar rol de usuario (solo admin)
+exports.actualizarRolUsuario = async (req, res) => {
+  const { id } = req.params;
+  const { rol_id } = req.body;
+
+  try {
+    // Validar que el rol_id sea válido
+    if (!rol_id || (parseInt(rol_id) !== 1 && parseInt(rol_id) !== 2)) {
+      return res.status(400).json({ 
+        message: 'El rol debe ser 1 (Usuario) o 2 (Administrador).' 
+      });
+    }
+
+    const usuarioActualizado = await usuariosModel.actualizarRolUsuario(id, parseInt(rol_id));
+
+    if (!usuarioActualizado) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+
+    res.json({ 
+      message: 'Rol actualizado con éxito.',
+      usuario: usuarioActualizado
+    });
+  } catch (error) {
+    console.error('Error al actualizar rol de usuario:', error);
+    res.status(500).json({ message: 'Error al actualizar rol de usuario.' });
+  }
+};
+
+// Actualizar datos de usuario (solo admin)
+exports.actualizarUsuarioAdmin = async (req, res) => {
+  const { id } = req.params;
+  const { 
+    nombre, 
+    apellido_paterno, 
+    apellido_materno, 
+    correo_electronico, 
+    telefono, 
+    direccion, 
+    rol_id 
+  } = req.body;
+
+  try {
+    // Validar que al menos un campo esté presente para actualizar
+    if (!nombre && !apellido_paterno && !apellido_materno && !correo_electronico && 
+        !telefono && !direccion && !rol_id) {
+      return res.status(400).json({ 
+        message: 'Debe proporcionar al menos un campo para actualizar.' 
+      });
+    }
+
+    // Validar rol_id si se proporciona
+    if (rol_id && (parseInt(rol_id) !== 1 && parseInt(rol_id) !== 2)) {
+      return res.status(400).json({ 
+        message: 'El rol debe ser 1 (Usuario) o 2 (Administrador).' 
+      });
+    }
+
+    // Validar formato de correo si se proporciona
+    if (correo_electronico) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(correo_electronico)) {
+        return res.status(400).json({ 
+          message: 'El formato del correo electrónico no es válido.' 
+        });
+      }
+    }
+
+    const usuarioActualizado = await usuariosModel.actualizarUsuarioAdmin(id, {
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      correo_electronico,
+      telefono,
+      direccion,
+      rol_id: rol_id ? parseInt(rol_id) : undefined
+    });
+
+    if (!usuarioActualizado) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+
+    res.json({ 
+      message: 'Usuario actualizado con éxito.',
+      usuario: usuarioActualizado
+    });
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    if (error.message.includes('correo_electronico')) {
+      res.status(400).json({ message: 'El correo electrónico ya está en uso.' });
+    } else {
+      res.status(500).json({ message: 'Error al actualizar usuario.' });
+    }
   }
 };
