@@ -16,11 +16,18 @@ module.exports = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Token decodificado:", decoded); // Log para confirmar el contenido del token
-    req.userId = decoded.userId;
-    req.userRol = decoded.rol;
+    
+    // Manejar tanto el formato nuevo (user.id) como el viejo (userId) para compatibilidad
+    req.userId = decoded.user?.id || decoded.userId;
+    req.userRol = parseInt(decoded.rol); // Convertir a número
+    
+    if (!req.userId) {
+      return res.status(401).json({ message: 'Token malformado.' });
+    }
+    
     next();
   } catch (error) {
-    console.error("Error al verificar el token:", error);
+    console.error("Error al verificar el token:", error.message);
     return res.status(401).json({ message: 'Token no válido.' });
   }
 };
