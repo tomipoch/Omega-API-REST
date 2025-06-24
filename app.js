@@ -1,8 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const cors = require('cors'); // Importar el middleware de CORS
+const cors = require('cors');
 const path = require('path');
-const bodyParser = require('body-parser');
 
 // Importar rutas
 const usuariosRoutes = require('./routes/usuariosRoutes');
@@ -15,25 +14,21 @@ const serviciosRoutes = require('./routes/serviciosRoutes');
 const faqRoutes = require('./routes/faqRoutes');  // Rutas de preguntas frecuentes
 const errorHandler = require('./middleware/errorHandler');
 
-// Configurar variables de entorno
 dotenv.config();
 
 // Crear la aplicación de Express
 const app = express();
 
-// Middleware para manejar solicitudes JSON y datos de formularios
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware para parsear datos
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Configuración de CORS para permitir acceso desde el frontend en localhost:5173
+// Configuración de CORS
 app.use(cors({
   origin: 'http://localhost:5173',
   methods: 'GET,POST,PUT,DELETE',
   credentials: true
 }));
-
-// Middleware para parsear JSON
-app.use(express.json());
 
 // Servir archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -63,3 +58,5 @@ console.log('Puerto desde .env:', process.env.PORT);  // Depuración de puerto
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
+
+console.log('Correo:', process.env.EMAIL_USER); // Esto debe mostrar tu correo sin errores
