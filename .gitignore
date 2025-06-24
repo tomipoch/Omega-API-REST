@@ -6,3 +6,6 @@ uploads/
 
 # Ignorar archivo .env
 .env
+
+error.log
+combined.log
