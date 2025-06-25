@@ -22,6 +22,10 @@ const Producto = sequelize.define('Producto', {
   stock: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  imagen_producto: {
+    type: DataTypes.STRING,
+    allowNull: true // Permite que la imagen sea opcional
   }
 }, {
   tableName: 'productos',
