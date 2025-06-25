@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const testimoniosController = require('../controllers/testimoniosController');
-const auth = require('../middleware/auth'); // Middleware de autenticación
+const auth = require('../middleware/authMiddleware'); // Middleware de autenticación
 const verificarRolAdmin = require('../middleware/verificarRolAdmin'); // Middleware para verificar el rol de admin
 
 // Rutas de testimonios

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const personalizacionController = require('../controllers/personalizacionController');
-const auth = require('../middleware/auth'); // Middleware de autenticación con x-auth-token
+const auth = require('../middleware/authMiddleware'); // Middleware de autenticación con x-auth-token
 const verificarRolAdmin = require('../middleware/verificarRolAdmin'); // Middleware para verificar el rol de admin
 const multer = require('multer'); // Middleware para manejar archivos
 

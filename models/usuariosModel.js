@@ -12,12 +12,14 @@ exports.registrarUsuario = async (nombre, apellido_paterno, apellido_materno, co
 
 // Obtener usuario por correo electrónico
 exports.obtenerUsuarioPorCorreo = async (correo_electronico) => {
+  console.log('Buscando usuario por correo:', correo_electronico);
   const query = `
     SELECT usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, contrasena, rol_id, foto_perfil_url
     FROM usuarios
     WHERE correo_electronico = $1
   `;
   const { rows } = await pool.query(query, [correo_electronico]);
+  console.log('Resultado de la consulta:', rows);
   return rows[0];
 };
 

@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
+const sequelize = require('./config/sequelize'); 
 
 // Importar rutas
 const usuariosRoutes = require('./routes/usuariosRoutes');
@@ -9,11 +10,11 @@ const citasRoutes = require('./routes/citasRoutes');
 const eventosRoutes = require('./routes/eventosRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const testimoniosRoutes = require('./routes/testimoniosRoutes');
-const personalizacionRoutes = require('./routes/personalizacionRoutes');  // Rutas de solicitud personalización
+const personalizacionRoutes = require('./routes/personalizacionRoutes');
 const serviciosRoutes = require('./routes/serviciosRoutes');
-const faqRoutes = require('./routes/faqRoutes');  // Rutas de preguntas frecuentes
+const faqRoutes = require('./routes/faqRoutes');
 const errorHandler = require('./middleware/errorHandler');
-
+const productosRoutes = require('./routes/productosRoutes');
 dotenv.config();
 
 // Crear la aplicación de Express
@@ -42,6 +43,7 @@ app.use('/testimonios', testimoniosRoutes);
 app.use('/faq', faqRoutes);
 app.use('/personalizacion', personalizacionRoutes);
 app.use('/servicios', serviciosRoutes);
+app.use('/productos', productosRoutes);
 
 // Ruta para verificar si el servidor está activo
 app.get('/ping', (req, res) => {
@@ -51,12 +53,17 @@ app.get('/ping', (req, res) => {
 // Middleware para manejar errores
 app.use(errorHandler);
 
-// Iniciar el servidor
+// Iniciar el servidor SOLO después de sincronizar Sequelize
 const PORT = process.env.PORT || 4000;
 console.log('Puerto desde .env:', process.env.PORT);  // Depuración de puerto
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+sequelize.sync().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
+  });
+}).catch((err) => {
+  console.error('Error al conectar con la base de datos:', err);
 });
 
-console.log('Correo:', process.env.EMAIL_USER); // Esto debe mostrar tu correo sin errores
+console.log('Correo:', process.env.EMAIL_USER);
+

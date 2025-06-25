@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const citasController = require('../controllers/citasController');
-const auth = require('../middleware/auth'); // Middleware de autenticación
+const auth = require('../middleware/authMiddleware'); // Middleware de autenticación
 
 router.post('/', auth, citasController.crearCita);
 router.get('/', auth, citasController.obtenerCitas);

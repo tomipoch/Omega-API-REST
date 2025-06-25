@@ -126,3 +126,5 @@
 {"level":"error","message":"no existe la columna u.id","service":"user-service"}
 {"level":"error","message":"no existe la columna u.id","service":"user-service"}
 {"level":"error","message":"no existe la columna u.id","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
