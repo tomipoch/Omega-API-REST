@@ -126,3 +126,25 @@
 {"level":"error","message":"no existe la columna u.id","service":"user-service"}
 {"level":"error","message":"no existe la columna u.id","service":"user-service"}
 {"level":"error","message":"no existe la columna u.id","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"no existe la relación «disponibilidad_citas»","service":"user-service"}
+{"level":"error","message":"no existe la relación «disponibilidad_citas»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"no existe la relación «disponibilidad_citas»","service":"user-service"}
+{"level":"error","message":"no existe la relación «disponibilidad_citas»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"el valor nulo en la columna «fecha_inicio» de la relación «eventos» viola la restricción de no nulo","service":"user-service"}
+{"level":"error","message":"la sintaxis de entrada no es válida para tipo integer: «undefined»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"la sintaxis de entrada no es válida para tipo integer: «undefined»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"la sintaxis de entrada no es válida para tipo integer: «undefined»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"la sintaxis de entrada no es válida para tipo integer: «undefined»","service":"user-service"}
+{"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"la sintaxis de entrada no es válida para tipo integer: «undefined»","service":"user-service"}
