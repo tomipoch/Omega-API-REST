@@ -18,8 +18,8 @@ router.delete('/perfil', auth, usuariosController.eliminarCuenta);
 router.post('/restablecer-solicitud', usuariosController.solicitarRestablecimientoContrasena); // Ruta para solicitar el restablecimiento de contraseña
 router.post('/restablecer', usuariosController.restablecerContrasena);// Ruta para restablecer la contraseña usando el código
 
-// Obtener todos los usuarios con filtros
+// Rutas administrativas (deben ir después de las rutas específicas)
 router.get('/all', auth, verificarRolAdmin, usuariosController.obtenerTodosLosUsuarios);
-router.delete('/:id', auth, usuariosController.eliminarUsuario);
+router.delete('/admin/:id', auth, verificarRolAdmin, usuariosController.eliminarUsuario);
 
 module.exports = router;

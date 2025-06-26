@@ -139,3 +139,11 @@
 {"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
 {"level":"error","message":"no existe la columna «seccion_id»","service":"user-service"}
 {"level":"error","message":"no existe la columna «seccion_id»","service":"user-service"}
+{"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
+{"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
+{"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
+{"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
+{"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
+{"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
+{"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
+{"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}

@@ -28,16 +28,11 @@ app.use(express.urlencoded({ extended: true }));
 // Configuración de CORS
 app.use(cors({
   origin: 'http://localhost:5173',
-  methods: 'GET,POST,PUT,DELETE',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
+  exposedHeaders: ['Authorization']
 }));
-
-// Middleware para exponer el header Authorization en las respuestas CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Expose-Headers', 'Authorization');
-  next();
-});
 
 // Servir archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

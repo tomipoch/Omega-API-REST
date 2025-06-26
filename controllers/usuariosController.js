@@ -192,17 +192,74 @@ exports.actualizarPerfil = async (req, res, next) => {
 // Eliminar cuenta del usuario autenticado
 exports.eliminarCuenta = async (req, res, next) => {
   try {
-    // Registrar el evento de auditoría antes de eliminar
-    await auditoriaController.registrarEvento(req.userId, 'eliminación de cuenta', 'El usuario solicitó la eliminación de su cuenta.');
+    console.log('Iniciando eliminación de cuenta para usuario ID:', req.userId);
+    
+    // Validar que el userId existe y es válido
+    if (!req.userId) {
+      console.error('Error: No se encontró userId en la request');
+      return res.status(400).json({ message: 'Usuario no autenticado correctamente.' });
+    }
 
-    const resultado = await usuariosModel.eliminarUsuario(req.userId);
-    if (!resultado) {
+    // Verificar que el usuario existe antes de intentar eliminarlo
+    const usuarioExistente = await usuariosModel.obtenerUsuarioPorId(req.userId);
+    if (!usuarioExistente) {
+      console.error('Error: Usuario no encontrado con ID:', req.userId);
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
 
-    res.json({ message: 'Cuenta eliminada con éxito.' });
+    console.log('Usuario encontrado:', usuarioExistente.correo_electronico);
+
+    // Registrar el evento de auditoría antes de eliminar
+    try {
+      await auditoriaController.registrarEvento(req.userId, 'eliminación de cuenta', 'El usuario solicitó la eliminación de su cuenta.');
+    } catch (auditoriaError) {
+      console.error('Error en auditoría (no crítico):', auditoriaError.message);
+      // Continuar con la eliminación aunque falle la auditoría
+    }
+
+    // Eliminar registros relacionados antes de eliminar el usuario
+    console.log('Eliminando registros relacionados...');
+    await usuariosModel.eliminarRegistrosRelacionados(req.userId);
+
+    // Intentar eliminar el usuario
+    const resultado = await usuariosModel.eliminarUsuario(req.userId);
+    
+    if (!resultado) {
+      console.error('Error: No se pudo eliminar el usuario con ID:', req.userId);
+      return res.status(500).json({ message: 'Error interno: No se pudo eliminar la cuenta.' });
+    }
+
+    console.log('Usuario eliminado exitosamente:', resultado.correo_electronico);
+    res.json({ 
+      message: 'Cuenta eliminada con éxito.',
+      usuario_eliminado: {
+        id: resultado.usuario_id,
+        correo: resultado.correo_electronico
+      }
+    });
   } catch (error) {
-    next(error);
+    console.error('Error al eliminar cuenta:', error);
+    
+    // Manejar errores específicos de la base de datos
+    if (error.code === '23503') {
+      return res.status(409).json({ 
+        message: 'No se puede eliminar la cuenta porque tiene datos relacionados. Por favor, contacte al administrador.',
+        error_code: 'FOREIGN_KEY_VIOLATION'
+      });
+    }
+    
+    if (error.code === '23505') {
+      return res.status(409).json({ 
+        message: 'Error de integridad en la base de datos.',
+        error_code: 'UNIQUE_VIOLATION'
+      });
+    }
+
+    // Error genérico
+    res.status(500).json({ 
+      message: 'Error interno del servidor al eliminar la cuenta.',
+      error_details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
@@ -315,15 +372,38 @@ exports.eliminarUsuario = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const usuarioEliminado = await usuariosModel.eliminarUsuarioPorId(id);
+    // Validar que el ID sea un número válido
+    const userId = parseInt(id);
+    if (isNaN(userId) || userId <= 0) {
+      console.error('ID de usuario inválido:', id);
+      return res.status(400).json({ message: 'ID de usuario inválido.' });
+    }
+
+    console.log('Eliminando usuario con ID:', userId);
+    
+    // Eliminar registros relacionados primero
+    await usuariosModel.eliminarRegistrosRelacionados(userId);
+    console.log('Registros relacionados eliminados para usuario ID:', userId);
+    
+    const usuarioEliminado = await usuariosModel.eliminarUsuarioPorId(userId);
 
     if (!usuarioEliminado) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
 
+    console.log('Usuario eliminado exitosamente:', usuarioEliminado.correo_electronico);
     res.json({ message: 'Usuario eliminado con éxito.' });
   } catch (error) {
     console.error('Error al eliminar usuario:', error); // Log del error
+    
+    // Manejar errores específicos de la base de datos
+    if (error.code === '23503') {
+      return res.status(409).json({ 
+        message: 'No se puede eliminar el usuario porque tiene datos relacionados.',
+        error_code: 'FOREIGN_KEY_VIOLATION'
+      });
+    }
+    
     res.status(500).json({ message: 'Error al eliminar usuario.' });
   }
 };
