@@ -134,3 +134,20 @@ exports.eliminarTestimonioAdmin = async (req, res, next) => {
     next(error);
   }
 };
+
+// Obtener testimonios públicos (sin autenticación) - solo testimonios aprobados
+exports.obtenerTestimoniosPublicos = async (req, res, next) => {
+  try {
+    const { stars, limit = 10, page = 1 } = req.query;
+    
+    const testimonios = await testimoniosModel.obtenerTestimoniosConFiltros({
+      stars,
+      usuario_id: null, // No filtrar por usuario específico
+      limit: parseInt(limit),
+      page: parseInt(page)
+    });
+    res.json(testimonios);
+  } catch (error) {
+    next(error);
+  }
+};
