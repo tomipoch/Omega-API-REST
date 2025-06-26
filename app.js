@@ -53,7 +53,7 @@ app.use('/blog', authMiddleware, blogRoutes);
 app.use('/testimonios', authMiddleware, testimoniosRoutes);
 app.use('/personalizacion', authMiddleware, personalizacionRoutes);
 app.use('/servicios', authMiddleware, serviciosRoutes);
-app.use('/productos', authMiddleware, productosRoutes);
+app.use('/productos', productosRoutes);
 
 // Ruta para verificar si el servidor está activo
 app.get('/ping', (req, res) => {
