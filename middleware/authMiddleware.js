@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
+  console.log('Headers recibidos:', req.headers);
   const authHeader = req.headers.authorization || req.headers['x-auth-token']; // Aceptar ambos
 
   if (!authHeader) {

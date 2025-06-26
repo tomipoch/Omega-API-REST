@@ -126,3 +126,16 @@
 {"level":"error","message":"no existe la columna u.id","service":"user-service"}
 {"level":"error","message":"no existe la columna u.id","service":"user-service"}
 {"level":"error","message":"no existe la columna u.id","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"la sintaxis de entrada no es válida para tipo integer: «ID_DEL_ARTICULO»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la relación «secciones_blog»","service":"user-service"}
+{"level":"error","message":"no existe la columna «seccion_id»","service":"user-service"}
+{"level":"error","message":"no existe la columna «seccion_id»","service":"user-service"}
