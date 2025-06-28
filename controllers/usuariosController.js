@@ -407,3 +407,137 @@ exports.eliminarUsuario = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar usuario.' });
   }
 };
+
+// Autenticación con Google OAuth
+exports.autenticarConGoogle = async (req, res, next) => {
+  try {
+    const { googleUser } = req; // Datos del usuario verificados por el middleware
+    
+    // Buscar si ya existe un usuario con este Google ID
+    let usuario = await usuariosModel.obtenerUsuarioPorGoogleId(googleUser.googleId);
+    
+    if (usuario) {
+      // Usuario ya existe con Google ID, iniciar sesión
+      const token = jwt.sign({ userId: usuario.usuario_id, rol: usuario.rol_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      
+      const baseUrl = `http://localhost:4000`;
+      const foto_perfil_url_completa = usuario.foto_perfil_url
+        ? `${baseUrl}${usuario.foto_perfil_url}`
+        : googleUser.picture || null;
+      
+      await auditoriaController.registrarEvento(usuario.usuario_id, 'inicio de sesión con Google', 'El usuario inició sesión con Google OAuth.');
+      
+      return res.json({
+        token,
+        nombre: usuario.nombre,
+        apellido_paterno: usuario.apellido_paterno,
+        apellido_materno: usuario.apellido_materno,
+        foto_perfil_url: foto_perfil_url_completa,
+        rol_id: usuario.rol_id,
+        loginMethod: 'google'
+      });
+    }
+    
+    // Verificar si existe un usuario con el mismo correo
+    const usuarioExistente = await usuariosModel.verificarCorreoExistente(googleUser.email);
+    
+    if (usuarioExistente && !usuarioExistente.google_id) {
+      // Usuario existe pero no tiene Google ID vinculado
+      // Vincular la cuenta de Google a la cuenta existente
+      usuario = await usuariosModel.vincularGoogleId(usuarioExistente.usuario_id, googleUser.googleId);
+      
+      const token = jwt.sign({ userId: usuario.usuario_id, rol: usuario.rol_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      
+      const baseUrl = `http://localhost:4000`;
+      const foto_perfil_url_completa = usuario.foto_perfil_url
+        ? `${baseUrl}${usuario.foto_perfil_url}`
+        : googleUser.picture || null;
+      
+      await auditoriaController.registrarEvento(usuario.usuario_id, 'vinculación de cuenta Google', 'El usuario vinculó su cuenta con Google OAuth.');
+      
+      return res.json({
+        token,
+        nombre: usuario.nombre,
+        apellido_paterno: usuario.apellido_paterno,
+        apellido_materno: usuario.apellido_materno,
+        foto_perfil_url: foto_perfil_url_completa,
+        rol_id: usuario.rol_id,
+        loginMethod: 'google',
+        accountLinked: true
+      });
+    }
+    
+    // Crear nuevo usuario con Google
+    const nombreCompleto = googleUser.name || '';
+    const partesNombre = nombreCompleto.split(' ');
+    const nombre = googleUser.given_name || partesNombre[0] || '';
+    const apellido_paterno = googleUser.family_name || partesNombre[1] || '';
+    const apellido_materno = partesNombre[2] || '';
+    
+    usuario = await usuariosModel.registrarUsuarioGoogle(
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      googleUser.email,
+      googleUser.googleId,
+      googleUser.picture
+    );
+    
+    const token = jwt.sign({ userId: usuario.usuario_id, rol: usuario.rol_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    
+    const baseUrl = `http://localhost:4000`;
+    const foto_perfil_url_completa = usuario.foto_perfil_url
+      ? `${baseUrl}${usuario.foto_perfil_url}`
+      : googleUser.picture || null;
+    
+    await auditoriaController.registrarEvento(usuario.usuario_id, 'registro con Google', 'El usuario se registró usando Google OAuth.');
+    
+    res.status(201).json({
+      token,
+      nombre: usuario.nombre,
+      apellido_paterno: usuario.apellido_paterno,
+      apellido_materno: usuario.apellido_materno,
+      foto_perfil_url: foto_perfil_url_completa,
+      rol_id: usuario.rol_id,
+      loginMethod: 'google',
+      newUser: true
+    });
+    
+  } catch (error) {
+    console.error('Error en autenticación con Google:', error);
+    next(error);
+  }
+};
+
+// Desvincular cuenta de Google
+exports.desvincularGoogle = async (req, res, next) => {
+  try {
+    const usuario = await usuariosModel.obtenerUsuarioPorId(req.userId);
+    
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+    
+    if (!usuario.google_id) {
+      return res.status(400).json({ message: 'La cuenta no está vinculada con Google.' });
+    }
+    
+    if (!usuario.contrasena) {
+      return res.status(400).json({ 
+        message: 'No puedes desvincular Google sin establecer una contraseña primero.',
+        requirePassword: true 
+      });
+    }
+    
+    // Desvincular removiendo el google_id
+    await usuariosModel.vincularGoogleId(req.userId, null);
+    
+    await auditoriaController.registrarEvento(req.userId, 'desvinculación de Google', 'El usuario desvinculó su cuenta de Google.');
+    
+    res.json({ message: 'Cuenta de Google desvinculada exitosamente.' });
+    
+  } catch (error) {
+    console.error('Error al desvincular Google:', error);
+    next(error);
+  }
+};

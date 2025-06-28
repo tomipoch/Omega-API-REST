@@ -208,3 +208,49 @@ exports.eliminarUsuarioPorId = async (usuario_id) => {
     throw error; // Re-lanzar el error para que el controlador lo maneje
   }
 };
+
+// Obtener usuario por Google ID
+exports.obtenerUsuarioPorGoogleId = async (google_id) => {
+  const query = `
+    SELECT usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id, foto_perfil_url, google_id
+    FROM usuarios
+    WHERE google_id = $1
+  `;
+  const { rows } = await pool.query(query, [google_id]);
+  return rows[0];
+};
+
+// Registrar usuario con Google OAuth
+exports.registrarUsuarioGoogle = async (nombre, apellido_paterno, apellido_materno, correo_electronico, google_id, foto_perfil_url) => {
+  const query = `
+    INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, correo_electronico, google_id, rol_id, foto_perfil_url)
+    VALUES ($1, $2, $3, $4, $5, $6, $7) 
+    RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id, foto_perfil_url, google_id;
+  `;
+  const rol_id = 1; // Rol de usuario regular por defecto
+  const { rows } = await pool.query(query, [nombre, apellido_paterno, apellido_materno, correo_electronico, google_id, rol_id, foto_perfil_url]);
+  return rows[0];
+};
+
+// Actualizar Google ID para usuario existente
+exports.vincularGoogleId = async (usuario_id, google_id) => {
+  const query = `
+    UPDATE usuarios
+    SET google_id = $1
+    WHERE usuario_id = $2
+    RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id, foto_perfil_url, google_id;
+  `;
+  const { rows } = await pool.query(query, [google_id, usuario_id]);
+  return rows[0];
+};
+
+// Verificar si un correo ya está registrado (incluyendo Google)
+exports.verificarCorreoExistente = async (correo_electronico) => {
+  const query = `
+    SELECT usuario_id, nombre, correo_electronico, google_id, contrasena
+    FROM usuarios
+    WHERE correo_electronico = $1
+  `;
+  const { rows } = await pool.query(query, [correo_electronico]);
+  return rows[0];
+};

@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 const sequelize = require('./config/sequelize');
+const configurarAsociaciones = require('./models/asociaciones'); // Importar asociaciones
 
 // Importar rutas y middlewares
 const usuariosRoutes = require('./routes/usuariosRoutes');
@@ -16,6 +17,7 @@ const faqRoutes = require('./routes/faqRoutes');
 const productosRoutes = require('./routes/productosRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const authMiddleware = require('./middleware/authMiddleware'); // Importa el middleware de autenticación
+const ReservaScheduler = require('./utils/reservaScheduler'); // Importar el programador de reservas
 
 dotenv.config();
 
@@ -62,7 +64,13 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 4000;
 console.log('Puerto desde .env:', process.env.PORT);
 
+// Configurar asociaciones antes de sincronizar
+// configurarAsociaciones(); // Comentado temporalmente
+
 sequelize.sync().then(() => {
+  // Iniciar el programador de reservas después de sincronizar la BD
+  ReservaScheduler.iniciar();
+  
   app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
   });

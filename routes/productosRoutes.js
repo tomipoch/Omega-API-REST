@@ -7,6 +7,9 @@ const multerProducto = require('../middleware/multerProducto'); // Importa el mi
 // Obtener productos
 router.get('/', productosController.obtenerProductos);
 
+// Obtener stock en tiempo real de un producto específico
+router.get('/:id/stock', productosController.obtenerStockProducto);
+
 // Crear producto (con subida de imagen)
 router.post(
   '/',
@@ -22,5 +25,19 @@ router.put(
   multerProducto.single('imagen_producto'), // Middleware para manejar la imagen
   productosController.actualizarProducto
 );
+
+// === RUTAS DE RESERVAS ===
+
+// Reservar producto (requiere autenticación)
+router.post('/:id/reservar', authMiddleware, productosController.reservarProducto);
+
+// Confirmar reserva (requiere autenticación)
+router.put('/reserva/:reservaId/confirmar', authMiddleware, productosController.confirmarReserva);
+
+// Cancelar reserva (requiere autenticación)
+router.delete('/reserva/:reservaId/cancelar', authMiddleware, productosController.cancelarReserva);
+
+// Obtener reservas del usuario autenticado
+router.get('/mis-reservas', authMiddleware, productosController.obtenerReservasUsuario);
 
 module.exports = router;
