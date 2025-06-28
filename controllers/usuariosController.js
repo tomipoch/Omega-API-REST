@@ -411,19 +411,43 @@ exports.eliminarUsuario = async (req, res) => {
 // Autenticación con Google OAuth
 exports.autenticarConGoogle = async (req, res, next) => {
   try {
+    console.log('🚀 [AuthController] Iniciando autenticación con Google');
+    console.log('   - Body recibido:', req.body);
+    console.log('   - Google User data:', req.googleUser);
+    
     const { googleUser } = req; // Datos del usuario verificados por el middleware
+    
+    if (!googleUser) {
+      console.log('❌ [AuthController] No se encontraron datos de Google User');
+      return res.status(400).json({ 
+        message: 'Datos de usuario de Google no disponibles',
+        error: 'GOOGLE_USER_DATA_MISSING'
+      });
+    }
+    
+    console.log('🔍 [AuthController] Buscando usuario existente con Google ID:', googleUser.googleId);
     
     // Buscar si ya existe un usuario con este Google ID
     let usuario = await usuariosModel.obtenerUsuarioPorGoogleId(googleUser.googleId);
     
     if (usuario) {
       // Usuario ya existe con Google ID, iniciar sesión
-      const token = jwt.sign({ userId: usuario.usuario_id, rol: usuario.rol_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      console.log('✅ [AuthController] Usuario existente encontrado, verificando foto de perfil');
       
-      const baseUrl = `http://localhost:4000`;
-      const foto_perfil_url_completa = usuario.foto_perfil_url
-        ? `${baseUrl}${usuario.foto_perfil_url}`
-        : googleUser.picture || null;
+      // Si el usuario no tiene foto o la foto de Google es diferente, actualizar
+      if (!usuario.foto_perfil_url && googleUser.picture) {
+        console.log('📸 [AuthController] Actualizando foto de perfil desde Google');
+        await usuariosModel.actualizarFotoPerfilGoogle(usuario.usuario_id, googleUser.picture);
+        usuario.foto_perfil_url = googleUser.picture;
+      }
+      
+      const token = jwt.sign({ 
+        userId: usuario.usuario_id, 
+        rol: usuario.rol_id,
+        foto_perfil_url: usuario.foto_perfil_url || googleUser.picture || null
+      }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      
+      const foto_perfil_url_final = usuario.foto_perfil_url || googleUser.picture || null;
       
       await auditoriaController.registrarEvento(usuario.usuario_id, 'inicio de sesión con Google', 'El usuario inició sesión con Google OAuth.');
       
@@ -432,7 +456,8 @@ exports.autenticarConGoogle = async (req, res, next) => {
         nombre: usuario.nombre,
         apellido_paterno: usuario.apellido_paterno,
         apellido_materno: usuario.apellido_materno,
-        foto_perfil_url: foto_perfil_url_completa,
+        foto_perfil_url: foto_perfil_url_final,
+        email: googleUser.email,
         rol_id: usuario.rol_id,
         loginMethod: 'google'
       });
@@ -444,14 +469,24 @@ exports.autenticarConGoogle = async (req, res, next) => {
     if (usuarioExistente && !usuarioExistente.google_id) {
       // Usuario existe pero no tiene Google ID vinculado
       // Vincular la cuenta de Google a la cuenta existente
+      console.log('🔗 [AuthController] Vinculando cuenta existente con Google y actualizando foto');
+      
       usuario = await usuariosModel.vincularGoogleId(usuarioExistente.usuario_id, googleUser.googleId);
       
-      const token = jwt.sign({ userId: usuario.usuario_id, rol: usuario.rol_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      // Si el usuario no tiene foto, actualizar con la de Google
+      if (!usuarioExistente.foto_perfil_url && googleUser.picture) {
+        console.log('📸 [AuthController] Guardando foto de perfil desde Google');
+        await usuariosModel.actualizarFotoPerfilGoogle(usuarioExistente.usuario_id, googleUser.picture);
+        usuario.foto_perfil_url = googleUser.picture;
+      }
       
-      const baseUrl = `http://localhost:4000`;
-      const foto_perfil_url_completa = usuario.foto_perfil_url
-        ? `${baseUrl}${usuario.foto_perfil_url}`
-        : googleUser.picture || null;
+      const token = jwt.sign({ 
+        userId: usuario.usuario_id, 
+        rol: usuario.rol_id,
+        foto_perfil_url: usuario.foto_perfil_url || googleUser.picture || null
+      }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      
+      const foto_perfil_url_final = usuario.foto_perfil_url || googleUser.picture || null;
       
       await auditoriaController.registrarEvento(usuario.usuario_id, 'vinculación de cuenta Google', 'El usuario vinculó su cuenta con Google OAuth.');
       
@@ -460,7 +495,8 @@ exports.autenticarConGoogle = async (req, res, next) => {
         nombre: usuario.nombre,
         apellido_paterno: usuario.apellido_paterno,
         apellido_materno: usuario.apellido_materno,
-        foto_perfil_url: foto_perfil_url_completa,
+        foto_perfil_url: foto_perfil_url_final,
+        email: googleUser.email,
         rol_id: usuario.rol_id,
         loginMethod: 'google',
         accountLinked: true
@@ -468,11 +504,15 @@ exports.autenticarConGoogle = async (req, res, next) => {
     }
     
     // Crear nuevo usuario con Google
+    console.log('🆕 [AuthController] Creando nuevo usuario con Google y foto de perfil');
     const nombreCompleto = googleUser.name || '';
     const partesNombre = nombreCompleto.split(' ');
     const nombre = googleUser.given_name || partesNombre[0] || '';
     const apellido_paterno = googleUser.family_name || partesNombre[1] || '';
     const apellido_materno = partesNombre[2] || '';
+    
+    // Usar la foto de perfil de Google directamente
+    const foto_perfil_google = googleUser.picture || null;
     
     usuario = await usuariosModel.registrarUsuarioGoogle(
       nombre,
@@ -480,15 +520,14 @@ exports.autenticarConGoogle = async (req, res, next) => {
       apellido_materno,
       googleUser.email,
       googleUser.googleId,
-      googleUser.picture
+      foto_perfil_google
     );
     
-    const token = jwt.sign({ userId: usuario.usuario_id, rol: usuario.rol_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    
-    const baseUrl = `http://localhost:4000`;
-    const foto_perfil_url_completa = usuario.foto_perfil_url
-      ? `${baseUrl}${usuario.foto_perfil_url}`
-      : googleUser.picture || null;
+    const token = jwt.sign({ 
+      userId: usuario.usuario_id, 
+      rol: usuario.rol_id,
+      foto_perfil_url: foto_perfil_google
+    }, process.env.JWT_SECRET, { expiresIn: '1h' });
     
     await auditoriaController.registrarEvento(usuario.usuario_id, 'registro con Google', 'El usuario se registró usando Google OAuth.');
     
@@ -497,7 +536,8 @@ exports.autenticarConGoogle = async (req, res, next) => {
       nombre: usuario.nombre,
       apellido_paterno: usuario.apellido_paterno,
       apellido_materno: usuario.apellido_materno,
-      foto_perfil_url: foto_perfil_url_completa,
+      foto_perfil_url: foto_perfil_google,
+      email: googleUser.email,
       rol_id: usuario.rol_id,
       loginMethod: 'google',
       newUser: true

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Debug Google OAuth - Omega</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .debug-section {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .debug-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .info-value {
+            color: #333;
+            font-family: monospace;
+            background: #fff;
+            padding: 5px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-test {
+            background: #28a745;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #b6d4d9;
+        }
+        
+        .google-auth-section {
+            text-align: center;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #4285f4;
+        }
+        
+        .steps {
+            text-align: left;
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔧 Debug Google OAuth</div>
+            <div class="subtitle">Herramienta de Diagnóstico para Omega API</div>
+        </div>
+
+        <!-- Información de Configuración -->
+        <div class="debug-section">
+            <div class="debug-title">📋 Información de Configuración</div>
+            <div class="info-grid">
+                <div class="info-label">Client ID:</div>
+                <div class="info-value">102613720703-cq73g92su0v8kevc0iuftjak0tm1e1al.apps.googleusercontent.com</div>
+                
+                <div class="info-label">Dominio Actual:</div>
+                <div class="info-value" id="currentDomain">-</div>
+                
+                <div class="info-label">URL Completa:</div>
+                <div class="info-value" id="currentUrl">-</div>
+                
+                <div class="info-label">Estado de Google API:</div>
+                <div class="info-value" id="googleApiStatus">Cargando...</div>
+                
+                <div class="info-label">Estado del Servidor:</div>
+                <div class="info-value" id="serverStatus">Verificando...</div>
+            </div>
+        </div>
+
+        <!-- Pasos para Solucionar -->
+        <div class="steps">
+            <h3>🛠️ Pasos para Solucionar el Error 400</h3>
+            <div class="step">
+                <strong>1. Verificar Dominio Autorizado en Google Console:</strong>
+                <br>• Ve a <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a>
+                <br>• Busca tu Client ID y haz clic en editar
+                <br>• En "Orígenes autorizados de JavaScript" agrega:
+                <pre>http://localhost:3000
+http://127.0.0.1:3000
+file://</pre>
+            </div>
+            
+            <div class="step">
+                <strong>2. Verificar Configuración del Proyecto:</strong>
+                <br>• Asegúrate de que "Google+ API" esté habilitada
+                <br>• Verifica que el proyecto esté en estado "En producción" o "Prueba"
+            </div>
+            
+            <div class="step">
+                <strong>3. Probar desde Servidor HTTP:</strong>
+                <br>• No uses file:// directamente, usa un servidor HTTP
+                <br>• Puedes usar: <code>python -m http.server 3000</code>
+                <br>• O instalar: <code>npm install -g http-server && http-server -p 3000</code>
+            </div>
+        </div>
+
+        <!-- Pruebas -->
+        <div class="debug-section">
+            <div class="debug-title">🧪 Pruebas de Conectividad</div>
+            <button class="btn btn-test" onclick="testServerConnection()">Probar Conexión con Servidor</button>
+            <button class="btn btn-test" onclick="testGoogleConfig()">Verificar Configuración Google</button>
+            <button class="btn btn-test" onclick="testManualToken()">Probar con Token Manual</button>
+        </div>
+
+        <!-- Sección de Google Auth -->
+        <div class="google-auth-section">
+            <div class="debug-title">🔐 Prueba de Google Sign-In</div>
+            <p style="margin-bottom: 20px;">Si aparece el botón de Google, la configuración básica es correcta:</p>
+            
+            <div id="g_id_onload"
+                 data-client_id="102613720703-cq73g92su0v8kevc0iuftjak0tm1e1al.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false"
+                 data-error_callback="handleGoogleError">
+            </div>
+            
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="rectangular"
+                 data-theme="outline"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left">
+            </div>
+        </div>
+
+        <!-- Estado -->
+        <div id="status"></div>
+        
+        <!-- Resultados -->
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:4000';
+        
+        // Mostrar información inicial
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('currentDomain').textContent = window.location.hostname;
+            document.getElementById('currentUrl').textContent = window.location.href;
+            
+            // Verificar si Google API se cargó
+            setTimeout(() => {
+                const status = window.google ? 'Cargado ✅' : 'Error ❌';
+                document.getElementById('googleApiStatus').textContent = status;
+            }, 2000);
+            
+            // Verificar servidor
+            testServerConnection();
+        });
+        
+        // Callback para respuesta exitosa de Google
+        function handleCredentialResponse(response) {
+            console.log('✅ Token recibido de Google:', response.credential);
+            showStatus('✅ Token de Google obtenido exitosamente!', 'success');
+            
+            // Mostrar información del token
+            showResults(`
+<h3>🎉 ¡Token de Google Obtenido!</h3>
+<p><strong>Token ID:</strong> ${response.credential.substring(0, 50)}...</p>
+<p><strong>Longitud:</strong> ${response.credential.length} caracteres</p>
+<button class="btn" onclick="sendToAPI('${response.credential}')">Enviar a API de Omega</button>
+            `);
+        }
+        
+        // Callback para errores de Google
+        function handleGoogleError(error) {
+            console.error('❌ Error de Google:', error);
+            showStatus(`❌ Error de Google: ${JSON.stringify(error)}`, 'error');
+            
+            showResults(`
+<h3>❌ Error de Google OAuth</h3>
+<pre>${JSON.stringify(error, null, 2)}</pre>
+<p><strong>Soluciones comunes:</strong></p>
+<ul>
+    <li>Verificar que el dominio esté autorizado en Google Console</li>
+    <li>Usar un servidor HTTP en lugar de file://</li>
+    <li>Verificar que el Client ID sea correcto</li>
+    <li>Asegurar que Google+ API esté habilitada</li>
+</ul>
+            `);
+        }
+        
+        // Enviar token a la API
+        async function sendToAPI(token) {
+            try {
+                showStatus('🔄 Enviando token a la API...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/usuarios/auth/google`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        googleToken: token
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showStatus('✅ ¡Autenticación exitosa!', 'success');
+                    showResults(`
+<h3>🎉 ¡Autenticación Exitosa!</h3>
+<pre>${JSON.stringify(data, null, 2)}</pre>
+                    `);
+                } else {
+                    showStatus(`❌ Error de la API: ${data.message}`, 'error');
+                    showResults(`
+<h3>❌ Error de la API</h3>
+<pre>${JSON.stringify(data, null, 2)}</pre>
+                    `);
+                }
+            } catch (error) {
+                showStatus(`❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+        
+        // Probar conexión con servidor
+        async function testServerConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/ping`);
+                const data = await response.json();
+                document.getElementById('serverStatus').textContent = 'Conectado ✅';
+                showStatus('✅ Servidor conectado correctamente', 'success');
+            } catch (error) {
+                document.getElementById('serverStatus').textContent = 'Error ❌';
+                showStatus('❌ Error de conexión con el servidor. ¿Está ejecutándose?', 'error');
+            }
+        }
+        
+        // Verificar configuración de Google
+        function testGoogleConfig() {
+            const hasGoogle = !!window.google;
+            const hasGsi = !!window.google?.accounts?.id;
+            
+            showResults(`
+<h3>🔍 Estado de Google API</h3>
+<ul>
+    <li>Google API cargada: ${hasGoogle ? '✅' : '❌'}</li>
+    <li>Google Sign-In disponible: ${hasGsi ? '✅' : '❌'}</li>
+    <li>Dominio actual: ${window.location.hostname}</li>
+    <li>Protocolo: ${window.location.protocol}</li>
+</ul>
+<p><strong>Recomendaciones:</strong></p>
+<ul>
+    <li>Si usas file://, cambia a http://localhost</li>
+    <li>Verifica dominios autorizados en Google Console</li>
+</ul>
+            `);
+        }
+        
+        // Probar con token manual
+        function testManualToken() {
+            const token = prompt('Ingresa un token de Google para probar:');
+            if (token) {
+                sendToAPI(token);
+            }
+        }
+        
+        // Mostrar estado
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+        
+        // Mostrar resultados
+        function showResults(html) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="debug-section">${html}</div>`;
+        }
+    </script>
+</body>
+</html>

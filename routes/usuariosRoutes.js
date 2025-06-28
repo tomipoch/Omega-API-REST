@@ -14,6 +14,32 @@ router.post('/login', usuariosController.iniciarSesion);
 router.post('/auth/google', googleAuthMiddleware, usuariosController.autenticarConGoogle);
 router.delete('/auth/google/unlink', auth, usuariosController.desvincularGoogle);
 
+// Endpoint de prueba para Google OAuth (sin validación real)
+router.post('/auth/google/test', (req, res) => {
+  console.log('🧪 [Test] Endpoint de prueba de Google OAuth');
+  console.log('   - Body recibido:', req.body);
+  
+  const { googleToken } = req.body;
+  
+  if (!googleToken) {
+    return res.status(400).json({
+      message: 'Token de Google requerido para la prueba',
+      error: 'GOOGLE_TOKEN_MISSING',
+      endpoint: '/usuarios/auth/google/test',
+      status: 'FUNCIONANDO'
+    });
+  }
+  
+  res.json({
+    message: '¡Endpoint de Google OAuth funcionando correctamente!',
+    status: 'SUCCESS',
+    received_token_length: googleToken.length,
+    endpoint: '/usuarios/auth/google/test',
+    next_step: 'Usar token real de Google en /usuarios/auth/google',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Perfil de usuario autenticado
 router.get('/perfil', auth, usuariosController.obtenerPerfil);
 router.put('/perfil', auth, usuariosController.actualizarPerfil);

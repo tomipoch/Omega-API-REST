@@ -247,10 +247,22 @@ exports.vincularGoogleId = async (usuario_id, google_id) => {
 // Verificar si un correo ya está registrado (incluyendo Google)
 exports.verificarCorreoExistente = async (correo_electronico) => {
   const query = `
-    SELECT usuario_id, nombre, correo_electronico, google_id, contrasena
+    SELECT usuario_id, nombre, correo_electronico, google_id, contrasena, foto_perfil_url
     FROM usuarios
     WHERE correo_electronico = $1
   `;
   const { rows } = await pool.query(query, [correo_electronico]);
+  return rows[0];
+};
+
+// Actualizar foto de perfil de usuario Google
+exports.actualizarFotoPerfilGoogle = async (usuario_id, foto_perfil_url) => {
+  const query = `
+    UPDATE usuarios
+    SET foto_perfil_url = $1
+    WHERE usuario_id = $2
+    RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id, foto_perfil_url, google_id;
+  `;
+  const { rows } = await pool.query(query, [foto_perfil_url, usuario_id]);
   return rows[0];
 };

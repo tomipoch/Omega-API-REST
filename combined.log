@@ -147,3 +147,6 @@
 {"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
 {"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
 {"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
+{"level":"error","message":"Illegal arguments: string, object","service":"user-service"}
+{"level":"error","message":"Illegal arguments: string, object","service":"user-service"}
+{"level":"error","message":"Illegal arguments: string, object","service":"user-service"}
