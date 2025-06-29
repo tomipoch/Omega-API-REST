@@ -5,6 +5,7 @@ const auth = require('../middleware/auth'); // Middleware de autenticación
 const verificarRolAdmin = require('../middleware/verificarRolAdmin'); // Middleware para verificar el rol de admin
 
 // Rutas de testimonios
+router.get('/publicos', testimoniosController.obtenerTestimoniosPublicos);     // Obtener testimonios públicos (sin auth)
 router.post('/', auth, testimoniosController.crearTestimonio);          // Crear testimonio (usuario autenticado)
 router.get('/', auth, testimoniosController.obtenerTestimonios);              // Obtener testimonios (con auth opcional para filtro por usuario)
 router.put('/:id', auth, testimoniosController.actualizarTestimonio);   // Actualizar testimonio (solo propietario)

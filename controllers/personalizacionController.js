@@ -23,7 +23,11 @@ exports.obtenerSolicitudes = async (req, res, next) => {
     const solicitudes = await personalizacionModel.obtenerSolicitudes();
     res.json(solicitudes);
   } catch (error) {
-    next(error);
+    console.error('Error al obtener solicitudes:', error.message);
+    res.status(500).json({ 
+      message: 'Error interno del servidor al obtener solicitudes',
+      error: error.message 
+    });
   }
 };
 
