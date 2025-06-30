@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Google OAuth - Omega API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .section {
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #007bff;
+            background: #f8f9fa;
+        }
+        .error-section {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        .success-section {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+        .warning-section {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+        .info-box {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #b8daff;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        .step {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .current-config {
+            background: #f1f3f4;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Diagnóstico Google OAuth</h1>
+            <p>Herramienta para diagnosticar y solucionar problemas de autenticación con Google</p>
+        </div>
+
+        <!-- Información actual -->
+        <div class="section">
+            <h2>📋 Configuración Actual</h2>
+            <div class="current-config">
+                <p><strong>🔑 Client ID:</strong> <span class="highlight">102613720703-cq73g92su0v8kevc0iuftjak0tm1e1al.apps.googleusercontent.com</span></p>
+                <p><strong>🌐 URL Actual:</strong> <span id="currentUrl" class="highlight"></span></p>
+                <p><strong>🏠 Origen:</strong> <span id="currentOrigin" class="highlight"></span></p>
+                <p><strong>📍 Protocolo:</strong> <span id="currentProtocol" class="highlight"></span></p>
+            </div>
+        </div>
+
+        <!-- Diagnóstico del Error 400 -->
+        <div class="section error-section">
+            <h2>❌ Error 400: invalid_request - Causas Comunes</h2>
+            
+            <div class="info-box">
+                <h3>🎯 Principales causas del error:</h3>
+                <ul>
+                    <li><strong>Origen no autorizado:</strong> El dominio/URL desde donde abres el archivo no está configurado en Google Cloud Console</li>
+                    <li><strong>Protocolo file://:</strong> Google OAuth no funciona con archivos locales (file://)</li>
+                    <li><strong>Client ID incorrecto:</strong> El Client ID no corresponde al proyecto correcto</li>
+                    <li><strong>Configuración incorrecta:</strong> Faltan configuraciones en Google Cloud Console</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h4>🔍 Verificación actual:</h4>
+                <p id="protocolCheck">Verificando protocolo...</p>
+                <p id="originCheck">Verificando origen...</p>
+            </div>
+        </div>
+
+        <!-- Soluciones paso a paso -->
+        <div class="section warning-section">
+            <h2>🛠️ Soluciones Paso a Paso</h2>
+
+            <div class="step">
+                <h3>1️⃣ Configurar Google Cloud Console</h3>
+                <p>Ve a <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console - Credenciales</a></p>
+                <ul>
+                    <li>Busca tu Client ID: <strong>102613720703-cq73g92su0v8kevc0iuftjak0tm1e1al.apps.googleusercontent.com</strong></li>
+                    <li>Haz clic en el ícono de editar (✏️)</li>
+                    <li>En <strong>"Orígenes autorizados de JavaScript"</strong> agrega:</li>
+                </ul>
+                <div class="code-block">
+http://localhost
+http://localhost:3000
+http://localhost:8080
+http://127.0.0.1
+http://127.0.0.1:3000
+http://127.0.0.1:8080
+https://localhost
+https://localhost:3000
+https://localhost:8080</div>
+                <p><strong>💡 Tip:</strong> Agrega tanto HTTP como HTTPS para máxima compatibilidad</p>
+            </div>
+
+            <div class="step">
+                <h3>2️⃣ Usar un Servidor HTTP Local</h3>
+                <p>Google OAuth requiere protocolo HTTP/HTTPS, no funciona con file://</p>
+                
+                <h4>Opción A: Python (recomendado)</h4>
+                <div class="code-block">
+# En el directorio de tu proyecto
+python -m http.server 8000
+# o si tienes Python 2:
+python -m SimpleHTTPServer 8000</div>
+                <p>Luego abre: <a href="http://localhost:8000/google_oauth_diagnostico.html" target="_blank">http://localhost:8000/google_oauth_diagnostico.html</a></p>
+
+                <h4>Opción B: Node.js</h4>
+                <div class="code-block">
+# Instalar http-server globalmente
+npm install -g http-server
+# Ejecutar en el directorio del proyecto
+http-server -p 8000</div>
+
+                <h4>Opción C: PHP</h4>
+                <div class="code-block">
+php -S localhost:8000</div>
+
+                <h4>Opción D: Live Server (VS Code)</h4>
+                <ul>
+                    <li>Instala la extensión "Live Server" en VS Code</li>
+                    <li>Haz clic derecho en este archivo HTML</li>
+                    <li>Selecciona "Open with Live Server"</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3>3️⃣ Verificar la Configuración</h3>
+                <button class="btn btn-warning" onclick="checkConfiguration()">🔍 Verificar Configuración Actual</button>
+                <div id="configResult"></div>
+            </div>
+        </div>
+
+        <!-- Prueba de autenticación -->
+        <div class="section success-section">
+            <h2>🧪 Prueba de Autenticación</h2>
+            <p>Una vez que hayas configurado Google Cloud Console y estés usando un servidor HTTP:</p>
+            
+            <div id="g_id_onload"
+                 data-client_id="102613720703-cq73g92su0v8kevc0iuftjak0tm1e1al.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+            </div>
+            
+            <div class="google-btn" style="text-align: center; margin: 20px 0;">
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="rectangular"
+                     data-theme="outline"
+                     data-text="signin_with"
+                     data-size="large"
+                     data-logo_alignment="left">
+                </div>
+            </div>
+
+            <div id="authStatus"></div>
+            <div id="authResult"></div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="section">
+            <h2>📚 Información Adicional</h2>
+            
+            <div class="info-box">
+                <h3>🔗 Enlaces Útiles:</h3>
+                <ul>
+                    <li><a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console - Credenciales</a></li>
+                    <li><a href="https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid" target="_blank">Obtener Client ID de Google</a></li>
+                    <li><a href="https://developers.google.com/identity/gsi/web/reference/js-reference" target="_blank">Documentación Google Sign-In</a></li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 Consejos:</h3>
+                <ul>
+                    <li>Los cambios en Google Cloud Console pueden tardar hasta 5 minutos en aplicarse</li>
+                    <li>Limpia la caché del navegador después de hacer cambios</li>
+                    <li>Asegúrate de que el proyecto esté habilitado en Google Cloud Console</li>
+                    <li>Verifica que la API de Google+ esté habilitada</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        // Mostrar información actual
+        window.addEventListener('load', () => {
+            document.getElementById('currentUrl').textContent = window.location.href;
+            document.getElementById('currentOrigin').textContent = window.location.origin;
+            document.getElementById('currentProtocol').textContent = window.location.protocol;
+            
+            checkProtocolAndOrigin();
+        });
+
+        function checkProtocolAndOrigin() {
+            const protocol = window.location.protocol;
+            const origin = window.location.origin;
+            
+            const protocolCheck = document.getElementById('protocolCheck');
+            const originCheck = document.getElementById('originCheck');
+            
+            // Verificar protocolo
+            if (protocol === 'file:') {
+                protocolCheck.innerHTML = '❌ <strong>Protocolo file:// detectado</strong> - Google OAuth no funcionará. Usa un servidor HTTP local.';
+                protocolCheck.style.color = '#dc3545';
+            } else if (protocol === 'http:' || protocol === 'https:') {
+                protocolCheck.innerHTML = '✅ <strong>Protocolo HTTP/HTTPS correcto</strong> - Protocolo compatible con Google OAuth.';
+                protocolCheck.style.color = '#28a745';
+            }
+            
+            // Verificar origen común
+            if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+                originCheck.innerHTML = '✅ <strong>Origen localhost detectado</strong> - Asegúrate de agregarlo en Google Cloud Console.';
+                originCheck.style.color = '#28a745';
+            } else {
+                originCheck.innerHTML = '⚠️ <strong>Origen personalizado</strong> - Asegúrate de agregarlo en Google Cloud Console.';
+                originCheck.style.color = '#ffc107';
+            }
+        }
+
+        function checkConfiguration() {
+            const result = document.getElementById('configResult');
+            const protocol = window.location.protocol;
+            const origin = window.location.origin;
+            
+            let status = '';
+            let allGood = true;
+            
+            if (protocol === 'file:') {
+                status += '❌ Protocolo file:// - Cambiar a servidor HTTP<br>';
+                allGood = false;
+            } else {
+                status += '✅ Protocolo correcto<br>';
+            }
+            
+            if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+                status += '✅ Origen localhost - Verificar en Google Cloud Console<br>';
+            } else {
+                status += '⚠️ Origen personalizado - Agregar en Google Cloud Console<br>';
+            }
+            
+            status += '<br><strong>Próximos pasos:</strong><br>';
+            if (!allGood) {
+                status += '1. Usar servidor HTTP local<br>';
+                status += '2. Configurar orígenes en Google Cloud Console<br>';
+                status += '3. Probar autenticación';
+            } else {
+                status += '1. Verificar configuración en Google Cloud Console<br>';
+                status += '2. Esperar 5 minutos para que se apliquen los cambios<br>';
+                status += '3. Limpiar caché del navegador<br>';
+                status += '4. Probar autenticación';
+            }
+            
+            result.innerHTML = `<div class="info-box">${status}</div>`;
+        }
+
+        // Función para manejar la respuesta de Google
+        function handleCredentialResponse(response) {
+            console.log('🎯 Token recibido de Google:', response.credential);
+            
+            showAuthStatus('✅ ¡Token recibido de Google!', 'success');
+            
+            const token = response.credential;
+            const tokenPreview = token.substring(0, 30) + '...' + token.substring(token.length - 10);
+            showAuthResult(`
+🎉 ¡ÉXITO! Google OAuth funcionando correctamente
+
+📝 Token recibido: ${tokenPreview}
+🔧 Configuración: ✅ Correcta
+🌐 Origen: ${window.location.origin}
+📍 Protocolo: ${window.location.protocol}
+
+💡 Ahora puedes usar este token para autenticarte en tu API.
+            `, 'success');
+            
+            // Opcional: probar con la API
+            testWithAPI(token);
+        }
+
+        // Probar con la API
+        async function testWithAPI(googleToken) {
+            try {
+                const response = await fetch('http://localhost:4000/usuarios/auth/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        googleToken: googleToken
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAuthResult(document.getElementById('authResult').innerHTML + `
+
+🔗 PRUEBA CON API:
+✅ Conexión exitosa con tu API
+👤 Usuario: ${data.nombre} ${data.apellido_paterno}
+🔑 JWT generado correctamente
+`, 'success');
+                } else {
+                    showAuthResult(document.getElementById('authResult').innerHTML + `
+
+🔗 PRUEBA CON API:
+⚠️ Token recibido pero error en API: ${data.message}
+💡 El problema está en el backend, no en Google OAuth
+`, 'warning');
+                }
+                
+            } catch (error) {
+                showAuthResult(document.getElementById('authResult').innerHTML + `
+
+🔗 PRUEBA CON API:
+❌ No se pudo conectar con la API (puerto 4000)
+💡 Asegúrate de que el servidor esté ejecutándose
+`, 'warning');
+            }
+        }
+
+        function showAuthStatus(message, type) {
+            const statusDiv = document.getElementById('authStatus');
+            const className = type === 'success' ? 'success-section' : 
+                            type === 'warning' ? 'warning-section' : 'error-section';
+            statusDiv.className = `section ${className}`;
+            statusDiv.innerHTML = `<strong>${message}</strong>`;
+        }
+
+        function showAuthResult(message, type) {
+            const resultDiv = document.getElementById('authResult');
+            const className = type === 'success' ? 'success-section' : 
+                            type === 'warning' ? 'warning-section' : 'error-section';
+            resultDiv.className = `section ${className}`;
+            resultDiv.innerHTML = `<pre style="white-space: pre-wrap;">${message}</pre>`;
+        }
+    </script>
+</body>
+</html>
