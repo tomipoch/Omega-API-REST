@@ -5,7 +5,9 @@ const path = require('path');
 const sequelize = require('./config/sequelize');
 const configurarAsociaciones = require('./models/asociaciones'); // Importar asociaciones
 
-// Importar rutas y middlewares
+
+// Importaciones
+dotenv.config();
 const usuariosRoutes = require('./routes/usuariosRoutes');
 const citasRoutes = require('./routes/citasRoutes');
 const eventosRoutes = require('./routes/eventosRoutes');
@@ -23,11 +25,9 @@ dotenv.config();
 
 const app = express();
 
-// Middleware para parsear datos
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Configuración de CORS
 app.use(cors({
   origin: 'http://localhost:5173',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -39,11 +39,9 @@ app.use(cors({
 // Servir archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Rutas públicas
+// Rutas
 app.use('/faq', faqRoutes);
 app.use('/usuarios', usuariosRoutes);
-
-// Rutas protegidas (requieren autenticación)
 app.use('/citas', authMiddleware, citasRoutes);
 app.use('/eventos', authMiddleware, eventosRoutes);
 app.use('/blog', authMiddleware, blogRoutes);
@@ -52,12 +50,10 @@ app.use('/personalizacion', authMiddleware, personalizacionRoutes);
 app.use('/servicios', authMiddleware, serviciosRoutes);
 app.use('/productos', productosRoutes);
 
-// Ruta para verificar si el servidor está activo
 app.get('/ping', (req, res) => {
   res.json({ message: 'pong' });
 });
 
-// Middleware para manejar errores
 app.use(errorHandler);
 
 // Iniciar el servidor SOLO después de sincronizar Sequelize
@@ -79,6 +75,4 @@ sequelize.sync().then(() => {
 });
 
 console.log('Correo:', process.env.EMAIL_USER);
-
-
 
