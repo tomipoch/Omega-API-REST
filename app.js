@@ -18,9 +18,12 @@ const serviciosRoutes = require('./routes/serviciosRoutes');
 const faqRoutes = require('./routes/faqRoutes');
 const disponibilidadRoutes = require('./routes/disponibilidadRoutes');
 const errorHandler = require('./middleware/errorHandler');
-
+const reservaRoutes = require('./routes/reservaRoutes');
+const productoRoutes = require('./routes/productosRoutes');
 // Crear app
 const app = express();
+const kpiRoutes = require('./routes/kpiRoutes');
+
 
 // Middleware
 app.use(express.json());
@@ -45,6 +48,14 @@ app.use('/faq', faqRoutes);
 app.use('/personalizacion', personalizacionRoutes);
 app.use('/servicios', serviciosRoutes);
 app.use('/disponibilidad', disponibilidadRoutes);
+
+// Rutas
+
+app.use('/reservas', reservaRoutes); // Ahora tus rutas están en /api/reservas
+app.use('/admin', kpiRoutes);
+
+
+app.use('/productos', productoRoutes);
 
 // Ping
 app.get('/ping', (req, res) => {
