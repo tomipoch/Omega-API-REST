@@ -1,4 +1,6 @@
 const Reserva = require('../models/reservaModel');
+const emailService = require('../middleware/emailReserva');
+
 const auditoriaController = require('./auditoriaController'); // Asumiendo que ya tienes este módulo
 
 exports.obtenerReservasUsuario = async (req, res) => {
@@ -129,6 +131,30 @@ exports.confirmarReserva = async (req, res) => {
 
     const reservaConfirmada = await Reserva.confirmarReserva(reservaId, usuarioId);
 
+    // Obtener datos para enviar email
+    try {
+      const usuario = await usuarioModel.obtenerUsuarioPorId(usuarioId);
+      // Ojo: necesitas implementar esta función en el modelo Reserva para obtener el producto según reserva
+      const producto = await Reserva.obtenerProductoPorReserva(reservaId);
+
+      // Prepara objeto con los datos que espera la función
+      const emailDatos = {
+        emailUsuario: usuario.email || usuario.correo_electronico, // según tu DB
+        nombreUsuario: `${usuario.nombre} ${usuario.apellido_paterno || ''} ${usuario.apellido_materno || ''}`.trim(),
+        nombreProducto: producto.nombre_producto,
+        cantidadReservada: reservaConfirmada.cantidad_reservada,
+        fechaExpiracion: reservaConfirmada.fecha_expiracion,
+        reservaId: reservaConfirmada.reserva_id,
+        precioTotal: producto.precio_producto * reservaConfirmada.cantidad_reservada
+      };
+
+      await emailService.enviarCorreoConfirmacionReserva(emailDatos);
+
+    } catch (emailError) {
+      console.error('Error al enviar correo de confirmación:', emailError.message);
+    }
+
+    // Auditoría
     try {
       await auditoriaController.registrarEvento(
         usuarioId,
@@ -158,6 +184,7 @@ exports.confirmarReserva = async (req, res) => {
     res.status(500).json({ message: 'Error interno al confirmar reserva' });
   }
 };
+
 
 exports.cancelarReserva = async (req, res) => {
   try {

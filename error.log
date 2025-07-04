@@ -161,3 +161,11 @@
 {"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
 {"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
 {"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
+{"level":"error","message":"update o delete en «usuarios» viola la llave foránea «auditoria_seguridad_usuario_id_fkey» en la tabla «auditoria_seguridad»","service":"user-service"}
+{"level":"error","message":"update o delete en «usuarios» viola la llave foránea «auditoria_seguridad_usuario_id_fkey» en la tabla «auditoria_seguridad»","service":"user-service"}
+{"level":"error","message":"ENOENT: no such file or directory, open 'C:\\Users\\jorda\\OneDrive\\Documentos\\Omega-API-REST\\uploads\\productos\\1751523089851-985066603.png'","service":"user-service"}
+{"level":"error","message":"ENOENT: no such file or directory, open 'C:\\Users\\jorda\\OneDrive\\Documentos\\Omega-API-REST\\uploads\\productos\\1751523093226-244694991.png'","service":"user-service"}
+{"level":"error","message":"ENOENT: no such file or directory, open 'C:\\Users\\jorda\\OneDrive\\Documentos\\Omega-API-REST\\uploads\\productos\\1751523098253-722816525.png'","service":"user-service"}
+{"level":"error","message":"ENOENT: no such file or directory, open 'C:\\Users\\jorda\\OneDrive\\Documentos\\Omega-API-REST\\uploads\\productos\\1751523122712-389333354.png'","service":"user-service"}
+{"level":"error","message":"ENOENT: no such file or directory, open 'C:\\Users\\jorda\\OneDrive\\Documentos\\Omega-API-REST\\uploads\\productos\\1751523162479-693888356.png'","service":"user-service"}
+{"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}

@@ -182,7 +182,25 @@ const ReservaModel = {
     `, [usuarioId]);
 
     return result.rows;
+  },
+
+  async obtenerProductoPorReserva(reservaId) {
+    const result = await pool.query(`
+      SELECT p.nombre_producto, p.precio_producto, p.imagen_producto
+      FROM reservas r
+      JOIN productos p ON r.producto_id = p.producto_id
+      WHERE r.reserva_id = $1
+    `, [reservaId]);
+
+    if (result.rows.length === 0) {
+      throw new Error('Producto de la reserva no encontrado');
+    }
+
+    return result.rows[0];
   }
+
+
+
 
 };
 

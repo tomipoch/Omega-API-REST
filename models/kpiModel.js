@@ -69,6 +69,45 @@ const KpiModel = {
     return result.rows;
   },
 
+  async stockDisponibleVsVendido() {
+    const result = await pool.query(`
+      SELECT 
+        p.producto_id,
+        p.nombre_producto,
+        p.stock,
+        COALESCE(SUM(r.cantidad_reservada),0) AS vendidos
+      FROM productos p
+      LEFT JOIN reservas r ON p.producto_id = r.producto_id AND r.estado_reserva = 'confirmada'
+      GROUP BY p.producto_id, p.nombre_producto, p.stock
+    `);
+    return result.rows;
+  },
+
+  async tasaCancelacion() {
+    const result = await pool.query(`
+      SELECT 
+        ROUND(
+          (SUM(CASE WHEN estado_reserva = 'cancelada' THEN 1 ELSE 0 END)::decimal / COUNT(*)) * 100, 2
+        ) AS porcentaje_cancelacion
+      FROM reservas
+    `);
+    return result.rows[0];
+  },
+
+  async ingresosMensuales() {
+    const result = await pool.query(`
+      SELECT 
+        TO_CHAR(fecha_reserva, 'YYYY-MM') AS mes,
+        SUM(monto_total) AS ingresos
+      FROM reservas
+      WHERE estado_reserva = 'confirmada'
+      GROUP BY mes
+      ORDER BY mes DESC
+      LIMIT 12
+    `);
+    return result.rows;
+  },
+
   async serviciosMasSolicitadosEnCitas() {
     const result = await pool.query(`
       SELECT s.nombre_servicio, COUNT(*) AS total
@@ -79,7 +118,23 @@ const KpiModel = {
       LIMIT 5
     `);
     return result.rows;
-  }
+  },
+
+  async reservasMensualesActivas() {
+    const result = await pool.query(`
+      SELECT
+        TO_CHAR(fecha_reserva, 'TMMonth') AS mes,
+        DATE_TRUNC('month', fecha_reserva) AS mes_fecha,
+        COUNT(*) AS total_reservas
+      FROM reservas
+      WHERE estado_reserva = 'activa'
+        AND fecha_reserva >= NOW() - INTERVAL '12 months'
+      GROUP BY mes, mes_fecha
+      ORDER BY mes_fecha ASC;
+    `);
+    return result.rows;
+  },
 };
 
 module.exports = KpiModel;
+
