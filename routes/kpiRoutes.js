@@ -5,5 +5,6 @@ const KpiController = require('../controllers/kpiController');
 
 router.get('/kpi', auth, KpiController.getResumenKPIs);
 router.get('/kpi/reservas-mensuales', auth, KpiController.getReservasMensuales);
+router.get('/kpi/reservas-estados', auth, KpiController.getReservasEstados);
 
 module.exports = router;

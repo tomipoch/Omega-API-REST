@@ -134,7 +134,46 @@ const KpiModel = {
     `);
     return result.rows;
   },
+
+  // --- Métodos faltantes para getResumenKPIs ---
+  async reservasConfirmadas() {
+    const result = await pool.query(`
+      SELECT COUNT(*) AS total 
+      FROM reservas 
+      WHERE estado_reserva = 'confirmada'
+    `);
+    return result.rows[0];
+  },
+
+  async citasAgendadas() {
+    const result = await pool.query(`
+      SELECT COUNT(*) AS total 
+      FROM citas 
+      WHERE estado_id = 1
+    `);
+    return result.rows[0];
+  },
+
+  async totalEventos() {
+    const result = await pool.query(`SELECT COUNT(*) AS total FROM eventos`);
+    return result.rows[0];
+  },
+
+  async totalServicios() {
+    const result = await pool.query(`SELECT COUNT(*) AS total FROM servicios`);
+    return result.rows[0];
+  },
+
+  async reservasEstados() {
+    const result = await pool.query(`
+      SELECT estado_reserva, COUNT(*) as total
+      FROM reservas
+      GROUP BY estado_reserva; `);
+    return result.rows;
+  }
+
 };
+
 
 module.exports = KpiModel;
 
