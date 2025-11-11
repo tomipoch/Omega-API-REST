@@ -169,6 +169,10 @@
 {"level":"error","message":"ENOENT: no such file or directory, open 'C:\\Users\\jorda\\OneDrive\\Documentos\\Omega-API-REST\\uploads\\productos\\1751523122712-389333354.png'","service":"user-service"}
 {"level":"error","message":"ENOENT: no such file or directory, open 'C:\\Users\\jorda\\OneDrive\\Documentos\\Omega-API-REST\\uploads\\productos\\1751523162479-693888356.png'","service":"user-service"}
 {"level":"error","message":"Ya estás inscrito en este evento.","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
+{"level":"error","message":"no existe la relación «usuarios»","service":"user-service"}
 {"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
 {"level":"error","message":"no existe la columna «duracion_estimada»","service":"user-service"}
 {"level":"error","message":"no existe la relación «disponibilidad_citas»","service":"user-service"}
