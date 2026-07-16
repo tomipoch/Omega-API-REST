@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: omega-joyeria-backend
+    env: node
+    plan: free
+    region: oregon
+
+    buildCommand: npm install
+    startCommand: node server.js
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+
+      # Secretas (ingresar manualmente en Dashboard de Render)
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: AI_BASE_URL
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: gpt-4o-mini
+
+      # CORS: configurar según el dominio del frontend
+      - key: CORS_ORIGINS
+        sync: false
