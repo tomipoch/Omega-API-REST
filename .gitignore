@@ -1,8 +1,22 @@
-# Ignorar node_modules
+# Ignorar dependencias
 node_modules/
+
+# Ignorar archivos de entorno
+.env
 
 # Ignorar carpeta de uploads
 uploads/
 
-# Ignorar archivo .env
-.env
+# Ignorar logs
+*.log
+
+# Ignorar dump de base de datos (puede contener datos sensibles)
+omegadb.sql
+
+# Ignorar archivos de prueba temporales
+debug_*.js
+debug_*.html
+test_*.js
+!test/**/*.test.js
+*.bak
+*.tmp
