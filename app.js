@@ -17,6 +17,7 @@ const serviciosRoutes = require('./routes/serviciosRoutes');
 const faqRoutes = require('./routes/faqRoutes');
 const productosRoutes = require('./routes/productosRoutes');
 const reporteRoutes = require('./routes/reporteRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const errorHandler = require('./middleware/errorHandler');
 const authMiddleware = require('./middleware/authMiddleware');
@@ -72,6 +73,7 @@ app.use('/testimonios', authMiddleware, testimoniosRoutes);
 app.use('/personalizacion', authMiddleware, personalizacionRoutes);
 app.use('/servicios', authMiddleware, serviciosRoutes);
 app.use('/productos', productosRoutes);
+app.use('/chat', authMiddleware, chatRoutes);
 app.use('/', reporteRoutes);
 
 app.get('/ping', (req, res) => {
