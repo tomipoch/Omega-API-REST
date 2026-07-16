@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../database/pgPool');
 
 // Crear una nueva solicitud de personalización
 exports.crearSolicitud = async (usuario_id, servicio_id, detalles) => {

@@ -1,4 +1,4 @@
-const pool = require('../db');  // Archivo donde se configura la conexión a PostgreSQL
+const pool = require('../database/pgPool');  // Archivo donde se configura la conexión a PostgreSQL
 
 // Crear una nueva cita
 exports.crearCita = async (usuarioId, fecha_hora, servicio_id, estado_id, notas) => {

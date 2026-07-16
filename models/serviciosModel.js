@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../database/pgPool');
 
 // Obtener todos los servicios
 exports.obtenerServicios = async () => {

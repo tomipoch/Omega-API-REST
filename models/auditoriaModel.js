@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../database/pgPool');
 
 // Registrar un evento de auditoría
 exports.registrarAuditoria = async (usuario_id, accion, detalles = null) => {
