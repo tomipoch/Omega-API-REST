@@ -1,32 +1,36 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const personalizacionController = require('../controllers/personalizacionController');
-const auth = require('../middleware/authMiddleware'); // Middleware de autenticación con x-auth-token
-const verificarRolAdmin = require('../middleware/verificarRolAdmin'); // Middleware para verificar el rol de admin
-const multer = require('multer'); // Middleware para manejar archivos
+const auth = require('../middleware/authMiddleware');
+const verificarRolAdmin = require('../middleware/verificarRolAdmin');
+const handleMulterError = require('../utils/multerErrorHandler');
 
-// Configurar multer para subir imágenes
+const uploadDir = 'uploads/';
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Carpeta donde se guardarán las imágenes
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname); // Nombre único para cada archivo
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
   }
 });
 const upload = multer({ storage });
 
-// Ruta para crear una nueva solicitud de personalización con imágenes
-router.post('/', auth, upload.array('imagenes'), personalizacionController.crearSolicitud);
+router.post('/', auth, upload.array('imagenes'), handleMulterError, personalizacionController.crearSolicitud);
 
-// Rutas para admin (ver todas las solicitudes y cambiar el estado)
 router.get('/', auth, verificarRolAdmin, personalizacionController.obtenerSolicitudes);
 router.put('/:id/aceptar', auth, verificarRolAdmin, (req, res, next) => {
-  req.body.nuevo_estado = 'aceptar'; // Pasamos el estado "aceptar" al controlador
+  req.body.nuevo_estado = 'aceptar';
   personalizacionController.actualizarEstadoSolicitud(req, res, next);
 });
 router.put('/:id/rechazar', auth, verificarRolAdmin, (req, res, next) => {
-  req.body.nuevo_estado = 'rechazar'; // Pasamos el estado "rechazar" al controlador
+  req.body.nuevo_estado = 'rechazar';
   personalizacionController.actualizarEstadoSolicitud(req, res, next);
 });
 

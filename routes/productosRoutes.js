@@ -1,35 +1,46 @@
 const express = require('express');
 const router = express.Router();
 const productosController = require('../controllers/productosController');
-const authMiddleware = require('../middleware/authMiddleware'); // Si usas autenticación
-const multerProducto = require('../middleware/multerProducto'); // Importa el middleware de multer
+const authMiddleware = require('../middleware/authMiddleware');
+const verificarRolAdmin = require('../middleware/verificarRolAdmin');
+const multerProducto = require('../middleware/multerProducto');
+const handleMulterError = require('../utils/multerErrorHandler');
+const { productoRules, reservaRules, handleValidation } = require('../middleware/validators/productosValidator');
 
-// Obtener productos
+// Obtener productos (público)
 router.get('/', productosController.obtenerProductos);
 
-// Obtener stock en tiempo real de un producto específico
+// Obtener stock en tiempo real (público)
 router.get('/:id/stock', productosController.obtenerStockProducto);
 
-// Crear producto (con subida de imagen)
+// Crear producto (solo admin)
 router.post(
   '/',
   authMiddleware,
-  multerProducto.single('imagen_producto'), // Middleware para manejar la imagen
+  verificarRolAdmin,
+  multerProducto.single('imagen_producto'),
+  handleMulterError,
+  productoRules,
+  handleValidation,
   productosController.crearProducto
 );
 
-// Actualizar producto (con subida de imagen)
+// Actualizar producto (solo admin)
 router.put(
   '/:id',
   authMiddleware,
-  multerProducto.single('imagen_producto'), // Middleware para manejar la imagen
+  verificarRolAdmin,
+  multerProducto.single('imagen_producto'),
+  handleMulterError,
+  productoRules,
+  handleValidation,
   productosController.actualizarProducto
 );
 
 // === RUTAS DE RESERVAS ===
 
 // Reservar producto (requiere autenticación)
-router.post('/:id/reservar', authMiddleware, productosController.reservarProducto);
+router.post('/:id/reservar', authMiddleware, reservaRules, handleValidation, productosController.reservarProducto);
 
 // Confirmar reserva (requiere autenticación)
 router.put('/reserva/:reservaId/confirmar', authMiddleware, productosController.confirmarReserva);
