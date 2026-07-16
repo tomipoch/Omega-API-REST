@@ -1,6 +1,8 @@
 const Reservas = require('../models/reservasModel');
 const Productos = require('./productosService');
+const Usuarios = require('../models/usuariosModel');
 const auditoria = require('./auditoriaService');
+const emailService = require('./emailService');
 const { NotFoundError, ConflictError, ValidationError } = require('../utils/errors');
 
 const CANTIDAD_MAXIMA = 10;
@@ -44,6 +46,24 @@ exports.confirmar = async (reservaId, usuarioId) => {
   if (!usuarioId) throw new ValidationError('Usuario no autenticado');
   const reserva = await Reservas.confirmarReserva(reservaId, usuarioId);
   await auditoria.registrar(usuarioId, 'confirma_reserva', `Confirmó reserva ${reservaId}`);
+
+  // Email de confirmación (no bloqueante)
+  try {
+    const usuario = await Usuarios.obtenerUsuarioPorId(usuarioId);
+    const producto = await Productos.obtenerPorId(reserva.producto_id);
+    if (usuario && producto) {
+      await emailService.enviarConfirmacionReserva({
+        correo: usuario.correo_electronico,
+        nombre: usuario.nombre,
+        reservaId,
+        nombreProducto: producto.nombre_producto,
+        cantidad: reserva.cantidad_reservada
+      });
+    }
+  } catch (emailError) {
+    // No afecta el flujo principal, solo se registra
+  }
+
   return reserva;
 };
 
