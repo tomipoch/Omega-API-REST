@@ -1,97 +1,33 @@
-const testimoniosModel = require('../models/testimoniosModel');
+const testimoniosService = require('../services/testimoniosService');
+const { asyncHandler } = require('../utils/asyncHandler');
 
-// Crear un nuevo testimonio
-exports.crearTestimonio = async (req, res, next) => {
-  const { contenido, estrellas } = req.body;
+exports.crearTestimonio = asyncHandler(async (req, res) => {
+  res.status(201).json(await testimoniosService.crear(req.userId, req.body.contenido, req.body.estrellas));
+});
 
-  try {
-    const nuevoTestimonio = await testimoniosModel.crearTestimonio(req.userId, contenido, estrellas);
-    res.status(201).json(nuevoTestimonio);
-  } catch (error) {
-    next(error);
-  }
-};
+exports.obtenerTestimonios = asyncHandler(async (req, res) => {
+  res.json(await testimoniosService.listarAprobados());
+});
 
+exports.actualizarTestimonio = asyncHandler(async (req, res) => {
+  res.json(await testimoniosService.actualizar(req.userId, req.params.id, req.body.contenido, req.body.estrellas));
+});
 
-// Obtener todos los testimonios aprobados
-exports.obtenerTestimonios = async (req, res, next) => {
-  try {
-    const testimonios = await testimoniosModel.obtenerTestimoniosAprobados();
-    res.json(testimonios);
-  } catch (error) {
-    next(error);
-  }
-};
+exports.eliminarTestimonio = asyncHandler(async (req, res) => {
+  await testimoniosService.eliminar(req.userId, req.params.id);
+  res.status(204).end();
+});
 
-// Actualizar un testimonio (solo el propietario)
-exports.actualizarTestimonio = async (req, res, next) => {
-  const { id } = req.params;
-  const { contenido, estrellas } = req.body;
+exports.aceptarTestimonio = asyncHandler(async (req, res) => {
+  const testimonio = await testimoniosService.aceptar(req.params.id);
+  res.status(200).json({ message: 'Testimonio confirmado con éxito.', testimonio });
+});
 
-  try {
-    const testimonioActualizado = await testimoniosModel.actualizarTestimonio(req.userId, id, contenido, estrellas);
-    if (!testimonioActualizado) {
-      return res.status(404).json({ message: 'Testimonio no encontrado o no tienes permiso para actualizarlo.' });
-    }
-    res.json(testimonioActualizado);
-  } catch (error) {
-    next(error);
-  }
-};
+exports.rechazarTestimonio = asyncHandler(async (req, res) => {
+  const testimonio = await testimoniosService.rechazar(req.params.id);
+  res.status(200).json({ message: 'Testimonio cancelado con éxito.', testimonio });
+});
 
-
-// Eliminar un testimonio (solo el propietario)
-exports.eliminarTestimonio = async (req, res, next) => {
-  const { id } = req.params;
-
-  try {
-    const resultado = await testimoniosModel.eliminarTestimonio(req.userId, id);
-    if (!resultado) {
-      return res.status(404).json({ message: 'Testimonio no encontrado o no tienes permiso para eliminarlo.' });
-    }
-    res.json({ message: 'Testimonio eliminado con éxito.' });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Aceptar un testimonio (Cambiar estado a Confirmado)
-exports.aceptarTestimonio = async (req, res, next) => {
-  const { id } = req.params;
-
-  try {
-    const testimonio = await testimoniosModel.actualizarEstadoTestimonio(id, 'Confirmado');
-    if (!testimonio) {
-      return res.status(404).json({ message: 'Testimonio no encontrado.' });
-    }
-    res.json({ message: 'Testimonio confirmado con éxito.', testimonio });
-  } catch (error) {
-    next(error);
-  }
-};
-
-
-// Rechazar un testimonio (Cambiar estado a Cancelado)
-exports.rechazarTestimonio = async (req, res, next) => {
-  const { id } = req.params;
-
-  try {
-    const testimonio = await testimoniosModel.actualizarEstadoTestimonio(id, 'Cancelado');
-    if (!testimonio) {
-      return res.status(404).json({ message: 'Testimonio no encontrado.' });
-    }
-    res.json({ message: 'Testimonio cancelado con éxito.', testimonio });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Obtener todos los testimonios pendientes (para admins)
-exports.obtenerTestimoniosPendientes = async (req, res, next) => {
-  try {
-    const testimonios = await testimoniosModel.obtenerTestimoniosPorEstado('Pendiente');
-    res.json(testimonios);
-  } catch (error) {
-    next(error);
-  }
-};
+exports.obtenerTestimoniosPendientes = asyncHandler(async (req, res) => {
+  res.json(await testimoniosService.listarPendientes());
+});
