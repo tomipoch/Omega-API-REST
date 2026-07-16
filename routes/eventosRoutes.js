@@ -11,8 +11,7 @@ router.delete('/:id', auth, verificarRolAdmin, eventosController.eliminarEvento)
 router.get('/', eventosController.obtenerEventos);                                  // Cualquier usuario puede ver los eventos
 
 // Rutas de inscripciones
-router.post('/inscripcion', auth, eventosController.inscribirEvento);   // Usuarios autenticados pueden inscribirse
-router.get('/inscripciones', auth, eventosController.obtenerInscripcionesUsuario); // Usuarios autenticados pueden ver sus inscripciones
-router.delete('/inscripcion/:evento_id', auth, eventosController.cancelarInscripcion); // Eliminar inscripción
+router.post('/inscripcion', auth, eventosController.inscribirEvento);
+router.delete('/inscripcion/:evento_id', auth, eventosController.cancelarInscripcion);
 
 module.exports = router;

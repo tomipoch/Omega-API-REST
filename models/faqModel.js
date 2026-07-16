@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../database/pgPool');
 
 // Crear una nueva pregunta frecuente
 exports.crearPregunta = async (pregunta, respuesta) => {

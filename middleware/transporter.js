@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config(); // Para cargar variables de entorno
+require('dotenv').config();
+const logger = require('../utils/logger');
 
-// Configura el transporte de Nodemailer
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -10,13 +10,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verifica que el transporte esté funcionando
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('Error en la configuración de Nodemailer:', error);
-  } else {
-    console.log('Nodemailer configurado correctamente');
-  }
-});
+if (process.env.NODE_ENV !== 'production' && process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+  transporter.verify((error) => {
+    if (error) logger.warn(`Nodemailer config error: ${error.message}`);
+    else logger.info('Nodemailer configured');
+  });
+}
 
 module.exports = transporter;

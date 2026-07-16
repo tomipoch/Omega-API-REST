@@ -2,12 +2,11 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
-const sequelize = require('./config/sequelize');
-const configurarAsociaciones = require('./models/asociaciones'); // Importar asociaciones
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
-
-// Importaciones
 dotenv.config();
+
 const usuariosRoutes = require('./routes/usuariosRoutes');
 const citasRoutes = require('./routes/citasRoutes');
 const eventosRoutes = require('./routes/eventosRoutes');
@@ -17,26 +16,50 @@ const personalizacionRoutes = require('./routes/personalizacionRoutes');
 const serviciosRoutes = require('./routes/serviciosRoutes');
 const faqRoutes = require('./routes/faqRoutes');
 const productosRoutes = require('./routes/productosRoutes');
-const errorHandler = require('./middleware/errorHandler');
-const authMiddleware = require('./middleware/authMiddleware'); // Importa el middleware de autenticación
-const ReservaScheduler = require('./utils/reservaScheduler'); // Importar el programador de reservas
+const reporteRoutes = require('./routes/reporteRoutes');
 
-dotenv.config();
+const errorHandler = require('./middleware/errorHandler');
+const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Seguridad
+app.use(helmet());
+
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error('Origen no permitido por CORS'));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
   exposedHeaders: ['Authorization']
 }));
 
-// Servir archivos estáticos desde la carpeta 'uploads'
+// Rate limit en endpoints sensibles
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiados intentos, intente más tarde.' }
+});
+app.use('/usuarios/login', authLimiter);
+app.use('/usuarios/auth/google', authLimiter);
+app.use('/usuarios/register', authLimiter);
+app.use('/usuarios/restablecer-solicitud', authLimiter);
+
+// Parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Estáticos
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rutas
@@ -49,6 +72,7 @@ app.use('/testimonios', authMiddleware, testimoniosRoutes);
 app.use('/personalizacion', authMiddleware, personalizacionRoutes);
 app.use('/servicios', authMiddleware, serviciosRoutes);
 app.use('/productos', productosRoutes);
+app.use('/', reporteRoutes);
 
 app.get('/ping', (req, res) => {
   res.json({ message: 'pong' });
@@ -56,23 +80,4 @@ app.get('/ping', (req, res) => {
 
 app.use(errorHandler);
 
-// Iniciar el servidor SOLO después de sincronizar Sequelize
-const PORT = process.env.PORT || 4000;
-console.log('Puerto desde .env:', process.env.PORT);
-
-// Configurar asociaciones antes de sincronizar
-// configurarAsociaciones(); // Comentado temporalmente
-
-sequelize.sync().then(() => {
-  // Iniciar el programador de reservas después de sincronizar la BD
-  ReservaScheduler.iniciar();
-  
-  app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
-  });
-}).catch((err) => {
-  console.error('Error al conectar con la base de datos:', err);
-});
-
-console.log('Correo:', process.env.EMAIL_USER);
-
+module.exports = app;

@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../database/pgPool');
 
 // Crear un nuevo testimonio
 exports.crearTestimonio = async (usuario_id, contenido, estrellas) => {

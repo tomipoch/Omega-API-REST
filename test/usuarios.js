@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../database/pgPool');
 const usuariosModel = require('../models/usuariosModel');
 
 describe('Modelo de Usuarios', () => {

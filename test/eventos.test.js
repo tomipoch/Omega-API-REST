@@ -1,5 +1,5 @@
 const eventosModel = require('../models/eventosModel');
-const pool = require('../db');
+const pool = require('../database/pgPool');
 
 describe('Modelo de Eventos', () => {
   let eventoCreado;

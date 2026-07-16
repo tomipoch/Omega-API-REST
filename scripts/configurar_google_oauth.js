@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../database/pgPool');
 
 async function agregarSoporteGoogleOAuth() {
   const client = await pool.connect();

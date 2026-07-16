@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../database/pgPool');
 
 // Crear un nuevo evento
 exports.crearEvento = async (nombre, descripcion, fecha_inicio, fecha_fin, ubicacion, capacidad) => {

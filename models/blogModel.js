@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../database/pgPool');
 
 // Crear una nueva publicación
 exports.crearPublicacion = async (autor_id, titulo, contenido) => {

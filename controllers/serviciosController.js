@@ -1,12 +1,6 @@
-const serviciosModel = require('../models/serviciosModel');
+const serviciosService = require('../services/serviciosService');
+const { asyncHandler } = require('../utils/asyncHandler');
 
-// Obtener todos los servicios
-exports.obtenerServicios = async (req, res, next) => {
-  try {
-    const servicios = await serviciosModel.obtenerServicios();
-    res.status(200).json(servicios);
-  } catch (error) {
-    console.error('Error al obtener los servicios:', error);
-    next(error);
-  }
-};
+exports.obtenerServicios = asyncHandler(async (req, res) => {
+  res.json(await serviciosService.listar());
+});
