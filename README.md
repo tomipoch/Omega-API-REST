@@ -75,7 +75,12 @@ Asegúrate de tener instalado:
    ```bash
    # Crear tabla de reservas
    node scripts/crear_tabla_reservas.js
+   # Configurar soporte para Google OAuth
+   node scripts/configurar_google_oauth.js
    ```
+
+5. **Variables de entorno**:
+   Copia `.env.example` a `.env` y completa los valores necesarios.
 
 5. **Iniciar Servidor**:
    ```bash
@@ -209,7 +214,8 @@ node test_reservas.js
 |--------|---------|-------------|
 | Iniciar servidor | `npm start` | Inicia el servidor en producción |
 | Desarrollo | `npm run dev` | Inicia con nodemon (auto-restart) |
-| Limpiar e iniciar | `.\start-server.bat` | Limpia procesos y inicia servidor |
+| Limpiar e iniciar | `./scripts/start-server.sh` (macOS) / `.\scripts\start-server.bat` (Windows) | Limpia procesos y inicia servidor |
 | Crear tabla reservas | `node scripts/crear_tabla_reservas.js` | Configura la BD de reservas |
-| Probar reservas | `node test_reservas.js` | Ejecuta pruebas del sistema |
+| Probar reservas | `node test/test_reservas.js` | Ejecuta pruebas del sistema |
+| Ejecutar tests | `npm test` | Ejecuta suite de Jest |
 
