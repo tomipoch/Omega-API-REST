@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const blogController = require('../controllers/blogController');
-const auth = require('../middleware/authMiddleware'); // Middleware de autenticación
-const verificarRolAdmin = require('../middleware/verificarRolAdmin'); // Middleware para verificar rol de admin
+const auth = require('../middleware/authMiddleware');
+const verificarRolAdmin = require('../middleware/verificarRolAdmin');
+const { idParam } = require('../middleware/validators/commonValidator');
+const { handleValidation } = require('../middleware/validators/authValidator');
 
-// Rutas de publicaciones del blog
-router.post('/', auth, verificarRolAdmin, blogController.crearPublicacion);          // Crear publicación (solo admin)
-router.get('/', blogController.obtenerPublicaciones);                                // Obtener todas las publicaciones
-router.get('/:id', blogController.obtenerPublicacionPorId);                          // Obtener una publicación por ID
-router.put('/:id', auth, verificarRolAdmin, blogController.actualizarPublicacion);   // Actualizar publicación (solo admin)
-router.delete('/:id', auth, verificarRolAdmin, blogController.eliminarPublicacion);  // Eliminar publicación (solo admin)
+router.post('/', auth, verificarRolAdmin, blogController.crearPublicacion);
+router.get('/', blogController.obtenerPublicaciones);
+router.get('/:id', idParam(), handleValidation, blogController.obtenerPublicacionPorId);
+router.put('/:id', auth, verificarRolAdmin, idParam(), handleValidation, blogController.actualizarPublicacion);
+router.delete('/:id', auth, verificarRolAdmin, idParam(), handleValidation, blogController.eliminarPublicacion);
 
 module.exports = router;

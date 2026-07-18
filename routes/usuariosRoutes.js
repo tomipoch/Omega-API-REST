@@ -3,7 +3,6 @@ const router = express.Router();
 const usuariosController = require('../controllers/usuariosController');
 const auth = require('../middleware/authMiddleware');
 const verificarRolAdmin = require('../middleware/verificarRolAdmin');
-const upload = require('../middleware/multerConfig');
 const { googleAuthMiddleware } = require('../middleware/googleAuth');
 const {
   registroRules,
@@ -11,18 +10,17 @@ const {
   restablecerSolicitudRules,
   restablecerRules,
   googleAuthRules,
+  actualizarPerfilRules,
   handleValidation
 } = require('../middleware/validators/authValidator');
+const { idParam } = require('../middleware/validators/commonValidator');
 
-// Registro e inicio de sesión
 router.post('/register', registroRules, handleValidation, usuariosController.registrarUsuario);
 router.post('/login', loginRules, handleValidation, usuariosController.iniciarSesion);
 
-// Autenticación con Google OAuth
 router.post('/auth/google', googleAuthRules, handleValidation, googleAuthMiddleware, usuariosController.autenticarConGoogle);
 router.delete('/auth/google/unlink', auth, usuariosController.desvincularGoogle);
 
-// Endpoint de prueba para Google OAuth (solo en desarrollo)
 if (process.env.NODE_ENV !== 'production') {
   router.post('/auth/google/test', (req, res) => {
     const { googleToken } = req.body;
@@ -36,7 +34,7 @@ if (process.env.NODE_ENV !== 'production') {
       });
     }
 
-    res.json({
+    return res.json({
       message: '¡Endpoint de Google OAuth funcionando correctamente!',
       status: 'SUCCESS',
       received_token_length: googleToken.length,
@@ -47,17 +45,21 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Perfil de usuario autenticado
 router.get('/perfil', auth, usuariosController.obtenerPerfil);
-router.put('/perfil', auth, usuariosController.actualizarPerfil);
+router.put('/perfil', auth, actualizarPerfilRules, handleValidation, usuariosController.actualizarPerfil);
 router.delete('/perfil', auth, usuariosController.eliminarCuenta);
 
-//Restablecimiento de contraseña
 router.post('/restablecer-solicitud', restablecerSolicitudRules, handleValidation, usuariosController.solicitarRestablecimientoContrasena);
 router.post('/restablecer', restablecerRules, handleValidation, usuariosController.restablecerContrasena);
 
-// Rutas administrativas (deben ir después de las rutas específicas)
 router.get('/all', auth, verificarRolAdmin, usuariosController.obtenerTodosLosUsuarios);
-router.delete('/admin/:id', auth, verificarRolAdmin, usuariosController.eliminarUsuario);
+router.delete(
+  '/admin/:id',
+  auth,
+  verificarRolAdmin,
+  idParam(),
+  handleValidation,
+  usuariosController.eliminarUsuario
+);
 
 module.exports = router;

@@ -6,14 +6,13 @@ const verificarRolAdmin = require('../middleware/verificarRolAdmin');
 const multerProducto = require('../middleware/multerProducto');
 const handleMulterError = require('../utils/multerErrorHandler');
 const { productoRules, reservaRules, handleValidation } = require('../middleware/validators/productosValidator');
+const { idParam } = require('../middleware/validators/commonValidator');
+const { handleValidation: commonHandle } = require('../middleware/validators/authValidator');
 
-// Obtener productos (público)
 router.get('/', productosController.obtenerProductos);
 
-// Obtener stock en tiempo real (público)
-router.get('/:id/stock', productosController.obtenerStockProducto);
+router.get('/:id/stock', idParam(), commonHandle, productosController.obtenerStockProducto);
 
-// Crear producto (solo admin)
 router.post(
   '/',
   authMiddleware,
@@ -25,11 +24,12 @@ router.post(
   productosController.crearProducto
 );
 
-// Actualizar producto (solo admin)
 router.put(
   '/:id',
   authMiddleware,
   verificarRolAdmin,
+  idParam(),
+  commonHandle,
   multerProducto.single('imagen_producto'),
   handleMulterError,
   productoRules,
@@ -37,18 +37,32 @@ router.put(
   productosController.actualizarProducto
 );
 
-// === RUTAS DE RESERVAS ===
+router.post(
+  '/:id/reservar',
+  authMiddleware,
+  idParam(),
+  commonHandle,
+  reservaRules,
+  handleValidation,
+  productosController.reservarProducto
+);
 
-// Reservar producto (requiere autenticación)
-router.post('/:id/reservar', authMiddleware, reservaRules, handleValidation, productosController.reservarProducto);
+router.put(
+  '/reserva/:reservaId/confirmar',
+  authMiddleware,
+  idParam('reservaId'),
+  commonHandle,
+  productosController.confirmarReserva
+);
 
-// Confirmar reserva (requiere autenticación)
-router.put('/reserva/:reservaId/confirmar', authMiddleware, productosController.confirmarReserva);
+router.delete(
+  '/reserva/:reservaId/cancelar',
+  authMiddleware,
+  idParam('reservaId'),
+  commonHandle,
+  productosController.cancelarReserva
+);
 
-// Cancelar reserva (requiere autenticación)
-router.delete('/reserva/:reservaId/cancelar', authMiddleware, productosController.cancelarReserva);
-
-// Obtener reservas del usuario autenticado
 router.get('/mis-reservas', authMiddleware, productosController.obtenerReservasUsuario);
 
 module.exports = router;

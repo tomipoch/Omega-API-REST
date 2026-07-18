@@ -12,7 +12,7 @@ const MENSAJE_POR_CODIGO = {
   LIMIT_UNEXPECTED_FILE: 'Campo de archivo inesperado'
 };
 
-const handleMulterError = (err, req, res, next) => {
+const handleMulterError = (err, req, res, _next) => {
   if (err instanceof multer.MulterError) {
     const status = LIMITE_POR_CODIGO[err.code] || 400;
     return res.status(status).json({
@@ -21,7 +21,7 @@ const handleMulterError = (err, req, res, next) => {
       ...(err.field && { field: err.field })
     });
   }
-  next(err);
+  return _next(err);
 };
 
 module.exports = handleMulterError;

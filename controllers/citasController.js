@@ -15,7 +15,9 @@ exports.obtenerTodasLasCitas = asyncHandler(async (req, res) => {
 
 exports.actualizarCita = asyncHandler(async (req, res) => {
   const datos = { ...req.body };
-  if (!datos.fecha_hora) datos.fecha_hora = new Date().toISOString();
+  if (datos.fecha_hora === '' || datos.fecha_hora === null) {
+    delete datos.fecha_hora;
+  }
   res.json(await citasService.actualizar(req.userId, req.params.id, datos));
 });
 

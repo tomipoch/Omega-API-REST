@@ -1,5 +1,6 @@
 const testimoniosModel = require('../models/testimoniosModel');
 const { NotFoundError } = require('../utils/errors');
+const { TESTIMONIO } = require('../utils/estados');
 
 exports.crear = (usuarioId, contenido, estrellas) =>
   testimoniosModel.crearTestimonio(usuarioId, contenido, estrellas);
@@ -18,15 +19,15 @@ exports.eliminar = async (usuarioId, id) => {
 };
 
 exports.aceptar = async (id) => {
-  const testimonio = await testimoniosModel.actualizarEstadoTestimonio(id, 'Confirmado');
+  const testimonio = await testimoniosModel.actualizarEstadoTestimonio(id, TESTIMONIO.CONFIRMADO);
   if (!testimonio) throw new NotFoundError('Testimonio no encontrado.');
   return testimonio;
 };
 
 exports.rechazar = async (id) => {
-  const testimonio = await testimoniosModel.actualizarEstadoTestimonio(id, 'Cancelado');
+  const testimonio = await testimoniosModel.actualizarEstadoTestimonio(id, TESTIMONIO.CANCELADO);
   if (!testimonio) throw new NotFoundError('Testimonio no encontrado.');
   return testimonio;
 };
 
-exports.listarPendientes = () => testimoniosModel.obtenerTestimoniosPorEstado('Pendiente');
+exports.listarPendientes = () => testimoniosModel.obtenerTestimoniosPorEstado(TESTIMONIO.PENDIENTE);

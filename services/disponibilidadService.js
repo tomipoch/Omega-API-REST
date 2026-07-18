@@ -29,9 +29,7 @@ exports.crear = async ({ fecha, hora_inicio, hora_fin, admin_id, notas }) => {
   }
 };
 
-exports.obtenerTodas = async (filtros) => {
-  return Disponibilidad.obtenerTodas(filtros);
-};
+exports.obtenerTodas = async (filtros) => Disponibilidad.obtenerTodas(filtros);
 
 exports.obtenerPorId = async (id) => {
   const disponibilidad = await Disponibilidad.obtenerPorId(id);

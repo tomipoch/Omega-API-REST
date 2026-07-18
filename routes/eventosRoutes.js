@@ -1,17 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const eventosController = require('../controllers/eventosController');
-const auth = require('../middleware/authMiddleware'); // Middleware de autenticación
-const verificarRolAdmin = require('../middleware/verificarRolAdmin'); // Middleware para verificar el rol de admin
+const auth = require('../middleware/authMiddleware');
+const verificarRolAdmin = require('../middleware/verificarRolAdmin');
+const { idParam } = require('../middleware/validators/commonValidator');
+const { handleValidation } = require('../middleware/validators/authValidator');
 
-// Rutas de eventos
-router.post('/', auth, verificarRolAdmin, eventosController.crearEvento);           // Solo admins pueden crear un evento
-router.put('/:id', auth, verificarRolAdmin, eventosController.actualizarEvento);    // Solo admins pueden actualizar un evento
-router.delete('/:id', auth, verificarRolAdmin, eventosController.eliminarEvento);   // Solo admins pueden eliminar un evento
-router.get('/', eventosController.obtenerEventos);                                  // Cualquier usuario puede ver los eventos
+router.post('/', auth, verificarRolAdmin, eventosController.crearEvento);
+router.put('/:id', auth, verificarRolAdmin, idParam(), handleValidation, eventosController.actualizarEvento);
+router.delete('/:id', auth, verificarRolAdmin, idParam(), handleValidation, eventosController.eliminarEvento);
+router.get('/', eventosController.obtenerEventos);
 
-// Rutas de inscripciones
 router.post('/inscripcion', auth, eventosController.inscribirEvento);
-router.delete('/inscripcion/:evento_id', auth, eventosController.cancelarInscripcion);
+router.delete(
+  '/inscripcion/:evento_id',
+  auth,
+  idParam('evento_id'),
+  handleValidation,
+  eventosController.cancelarInscripcion
+);
 
 module.exports = router;
