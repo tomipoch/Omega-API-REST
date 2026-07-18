@@ -5,9 +5,7 @@ exports.crear = async (datos, imagenes = []) => {
   const solicitud = await personalizacionModel.crearSolicitud(
     datos.usuario_id, datos.servicio_id, datos.detalles
   );
-  await Promise.all(
-    imagenes.map(imagen => personalizacionModel.agregarImagen(solicitud.solicitud_id, imagen))
-  );
+  await personalizacionModel.agregarImagenes(solicitud.solicitud_id, imagenes);
   return solicitud;
 };
 

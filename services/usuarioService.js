@@ -14,16 +14,13 @@ exports.sanitizar = (usuario) => authService.sanitizarUsuario(usuario);
 exports.listar = (filtros) => usuariosModel.obtenerTodosLosUsuarios(filtros);
 
 exports.actualizar = async (id, datos) => {
-  const actualizado = await usuariosModel.actualizarUsuario(
-    id, datos.nombre, datos.apellido_paterno, datos.apellido_materno,
-    datos.correo_electronico, datos.telefono, datos.direccion, datos.foto_perfil_url
-  );
+  const actualizado = await usuariosModel.actualizarUsuario(id, datos);
   if (!actualizado) throw new NotFoundError('Usuario no encontrado.');
   return actualizado;
 };
 
 exports.eliminarCuenta = async (usuarioId) => {
-  const usuario = await exports.obtenerPorId(usuarioId);
+  await exports.obtenerPorId(usuarioId);
 
   await auditoria.registrar(
     usuarioId, 'eliminación de cuenta',
