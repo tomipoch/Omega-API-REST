@@ -1,7 +1,7 @@
 const logger = require('../utils/logger');
 const { AppError } = require('../utils/errors');
 
-module.exports = (err, req, res, next) => {
+module.exports = (err, req, res, _next) => {
   logger.error(err.stack || err.message);
 
   if (err instanceof AppError) {
@@ -32,7 +32,7 @@ module.exports = (err, req, res, next) => {
     return res.status(403).json({ message: 'Origen no permitido', code: 'CORS_DENIED' });
   }
 
-  res.status(500).json({
+  return res.status(500).json({
     message: 'Error interno del servidor',
     ...(process.env.NODE_ENV === 'development' && { error: err.message })
   });

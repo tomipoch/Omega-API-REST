@@ -1,11 +1,8 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const path = require('path');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+require('./utils/env');
 
-dotenv.config();
+const express = require('express');
+const path = require('path');
+const logger = require('./utils/logger');
 
 const usuariosRoutes = require('./routes/usuariosRoutes');
 const citasRoutes = require('./routes/citasRoutes');
@@ -23,49 +20,79 @@ const kpiRoutes = require('./routes/kpiRoutes');
 
 const errorHandler = require('./middleware/errorHandler');
 const authMiddleware = require('./middleware/authMiddleware');
+const requestLogger = require('./middleware/requestLogger');
+const securityHeaders = require('./middleware/securityHeaders');
+const corsMiddleware = require('./middleware/cors');
+const {
+  authLimiter,
+  reservasLimiter,
+  chatLimiter,
+  disponibilidadLimiter
+} = require('./middleware/rateLimiters');
+
+const pool = require('./database/pgPool');
+const swaggerSpec = require('./swagger');
 
 const app = express();
 
-// Seguridad
-app.use(helmet());
+app.set('trust proxy', 1);
 
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
-  .split(',')
-  .map(s => s.trim())
-  .filter(Boolean);
+app.use(securityHeaders);
+app.use(corsMiddleware);
+app.use(requestLogger);
 
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error('Origen no permitido por CORS'));
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
-  exposedHeaders: ['Authorization']
-}));
-
-// Rate limit en endpoints sensibles
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: 'Demasiados intentos, intente más tarde.' }
-});
 app.use('/usuarios/login', authLimiter);
 app.use('/usuarios/auth/google', authLimiter);
 app.use('/usuarios/register', authLimiter);
 app.use('/usuarios/restablecer-solicitud', authLimiter);
+app.use('/chat', chatLimiter);
+app.use('/disponibilidad/publicas', disponibilidadLimiter);
+app.use('/disponibilidad/publicas-con-cita', disponibilidadLimiter);
+app.use('/productos/:id/reservar', reservasLimiter);
 
-// Parsers
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Estáticos
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Rutas
+const SWAGGER_HTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Omega Joyería API</title>
+<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css">
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+<script>
+  window.onload = () => {
+    window.ui = SwaggerUIBundle({ url: '/api-docs-json', dom_id: '#swagger-ui' });
+  };
+</script>
+</body>
+</html>`;
+
+app.get('/api-docs', (_req, res) => {
+  res.set('Content-Type', 'text/html').send(SWAGGER_HTML);
+});
+app.get('/api-docs-json', (_req, res) => res.json(swaggerSpec));
+
+app.get('/ping', (_req, res) => {
+  res.json({ message: 'pong' });
+});
+
+app.get('/health/db', async (_req, res) => {
+  const start = Date.now();
+  try {
+    await pool.query('SELECT 1');
+    res.status(200).json({ db: 'up', latency_ms: Date.now() - start });
+  } catch (err) {
+    logger.error(`Health check DB failed: ${err.stack || err.message}`);
+    res.status(503).json({ db: 'down', latency_ms: Date.now() - start, error: err.message });
+  }
+});
+
 app.use('/faq', faqRoutes);
 app.use('/usuarios', usuariosRoutes);
 app.use('/citas', authMiddleware, citasRoutes);
@@ -79,10 +106,6 @@ app.use('/chat', authMiddleware, chatRoutes);
 app.use('/disponibilidad', disponibilidadRoutes);
 app.use('/admin', kpiRoutes);
 app.use('/', reporteRoutes);
-
-app.get('/ping', (req, res) => {
-  res.json({ message: 'pong' });
-});
 
 app.use(errorHandler);
 

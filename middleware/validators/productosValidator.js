@@ -18,8 +18,8 @@ exports.handleValidation = (req, res, next) => {
     return res.status(422).json({
       message: 'Datos inválidos',
       code: 'VALIDATION_FAILED',
-      errors: errors.array().map(e => ({ field: e.path, message: e.msg }))
+      errors: errors.array().map((e) => ({ field: e.path, message: e.msg }))
     });
   }
-  next();
+  return next();
 };

@@ -21,7 +21,7 @@ module.exports = (req, res, next) => {
 
     req.userId = decoded.userId;
     req.userRol = decoded.rol;
-    next();
+    return next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ message: 'Token expirado.' });
