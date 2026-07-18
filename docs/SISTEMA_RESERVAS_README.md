@@ -17,7 +17,7 @@ Sistema completo de reservas en tiempo real que permite a los usuarios reservar 
 
 ### 🛠️ Componentes Añadidos
 
-- **Modelo de Reservas** (`models/reservaModel.js`)
+- **Modelo de Reservas** (`models/reservasModel.js`)
 - **Controlador de Reservas** (en `controllers/productosController.js`)
 - **Rutas de Reservas** (en `routes/productosRoutes.js`)
 - **Programador de Tareas** (`utils/reservaScheduler.js`)
@@ -28,16 +28,16 @@ Sistema completo de reservas en tiempo real que permite a los usuarios reservar 
 
 ### 1. Crear la tabla de reservas
 
-Ejecutar el script SQL en PostgreSQL:
+Las tablas se crean automáticamente al correr las migrations:
 
-```sql
--- Ubicado en: database/crear_tabla_reservas.sql
+```bash
+npm run migrate
 ```
 
 ### 2. Instalar dependencias
 
 ```bash
-npm install node-cron
+npm install
 ```
 
 ## 🔗 API Endpoints
