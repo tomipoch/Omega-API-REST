@@ -27,16 +27,19 @@ const sanitizarUsuario = (usuario) => ({
 
 const generarCodigo6Digitos = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-const construirRespuestaGoogle = (usuario, googleUser) => ({
-  token: generarToken(usuario),
-  nombre: usuario.nombre,
-  apellido_paterno: usuario.apellido_paterno,
-  apellido_materno: usuario.apellido_materno,
-  foto_perfil_url: usuario.foto_perfil_url || googleUser.picture || null,
-  email: googleUser.email,
-  rol_id: usuario.rol_id,
-  loginMethod: 'google'
-});
+const construirRespuestaGoogle = async (usuario, googleUser) => {
+  await usuariosModel.actualizarUltimoInicioSesion(usuario.usuario_id).catch(() => null);
+  return {
+    token: generarToken(usuario),
+    nombre: usuario.nombre,
+    apellido_paterno: usuario.apellido_paterno,
+    apellido_materno: usuario.apellido_materno,
+    foto_perfil_url: usuario.foto_perfil_url || googleUser.picture || null,
+    email: googleUser.email,
+    rol_id: usuario.rol_id,
+    loginMethod: 'google'
+  };
+};
 
 const actualizarFotoSiVacia = async (usuarioId, fotoActual, fotoGoogle) => {
   if (!fotoActual && fotoGoogle) {
@@ -119,6 +122,8 @@ exports.login = async (correo, contrasena) => {
   const valida = await bcrypt.compare(contrasena, usuario.contrasena);
   if (!valida) throw new UnauthorizedError('Credenciales inválidas.');
 
+  await usuariosModel.actualizarUltimoInicioSesion(usuario.usuario_id).catch(() => null);
+
   return { token: generarToken(usuario), ...sanitizarUsuario(usuario) };
 };
 
@@ -164,5 +169,3 @@ exports.restablecer = async (correo, codigo, nuevaContrasena) => {
 };
 
 exports.sanitizarUsuario = sanitizarUsuario;
-exports.generarToken = generarToken;
-exports.moverFotoTemporal = require('./fileService').moverFotoTemporal;

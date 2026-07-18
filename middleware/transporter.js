@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config();
 const logger = require('../utils/logger');
 
 const transporter = nodemailer.createTransport({

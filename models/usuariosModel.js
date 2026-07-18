@@ -1,11 +1,28 @@
 const pool = require('../database/pgPool');
 
-exports.registrarUsuario = async (nombre, apellido_paterno, apellido_materno, correo_electronico, contrasena, rol_id, foto_perfil_url) => {
+exports.registrarUsuario = async (
+  nombre,
+  apellido_paterno,
+  apellido_materno,
+  correo_electronico,
+  contrasena,
+  rol_id,
+  foto_perfil_url
+) => {
   const query = `
     INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, correo_electronico, contrasena, rol_id, foto_perfil_url)
-    VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id, foto_perfil_url;
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id, foto_perfil_url;
   `;
-  const { rows } = await pool.query(query, [nombre, apellido_paterno, apellido_materno, correo_electronico, contrasena, rol_id, foto_perfil_url]);
+  const { rows } = await pool.query(query, [
+    nombre,
+    apellido_paterno,
+    apellido_materno,
+    correo_electronico,
+    contrasena,
+    rol_id,
+    foto_perfil_url
+  ]);
   return rows[0];
 };
 
@@ -25,18 +42,28 @@ exports.obtenerUsuarioPorId = async (usuario_id) => {
   return rows[0];
 };
 
-exports.actualizarUsuario = async (usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, telefono, direccion, foto_perfil_url) => {
+exports.actualizarUsuario = async (usuario_id, datos) => {
+  const { nombre, apellido_paterno, apellido_materno, correo_electronico, telefono, direccion, foto_perfil_url } =
+    datos;
   const query = `
     UPDATE usuarios
     SET nombre = $1, apellido_paterno = $2, apellido_materno = $3, correo_electronico = $4, telefono = $5, direccion = $6, foto_perfil_url = $7
     WHERE usuario_id = $8
     RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, telefono, direccion, foto_perfil_url;
   `;
-  const { rows } = await pool.query(query, [nombre, apellido_paterno, apellido_materno, correo_electronico, telefono, direccion, foto_perfil_url, usuario_id]);
+  const { rows } = await pool.query(query, [
+    nombre,
+    apellido_paterno,
+    apellido_materno,
+    correo_electronico,
+    telefono,
+    direccion,
+    foto_perfil_url,
+    usuario_id
+  ]);
   return rows[0];
 };
 
-// Tabla declarativa → Function Composition
 const TABLAS_DEPENDIENTES = [
   'auditoria_seguridad',
   'citas',
@@ -45,12 +72,13 @@ const TABLAS_DEPENDIENTES = [
   'reservas',
   'restablecimiento_contrasena',
   'solicitudes_personalizacion',
+  'solicitudes_imagenes',
   'testimonios',
   'preguntas_frecuentes'
 ];
 
 exports.eliminarRegistrosRelacionados = async (usuario_id) => {
-  const queries = TABLAS_DEPENDIENTES.map(tabla =>
+  const queries = TABLAS_DEPENDIENTES.map((tabla) =>
     pool.query(`DELETE FROM ${tabla} WHERE usuario_id = $1`, [usuario_id])
   );
   await Promise.all(queries);
@@ -105,6 +133,17 @@ exports.actualizarFotoPerfil = async (usuario_id, foto_perfil_url) => {
   return rows[0];
 };
 
+exports.actualizarUltimoInicioSesion = async (usuario_id) => {
+  const query = `
+    UPDATE usuarios
+    SET ultimo_inicio_sesion = NOW()
+    WHERE usuario_id = $1
+    RETURNING usuario_id, ultimo_inicio_sesion;
+  `;
+  const { rows } = await pool.query(query, [usuario_id]);
+  return rows[0];
+};
+
 exports.obtenerTodosLosUsuarios = async (filtros) => {
   const { nombre, rol } = filtros;
 
@@ -147,14 +186,29 @@ exports.obtenerUsuarioPorGoogleId = async (google_id) => {
   return rows[0];
 };
 
-exports.registrarUsuarioGoogle = async (nombre, apellido_paterno, apellido_materno, correo_electronico, google_id, foto_perfil_url) => {
+exports.registrarUsuarioGoogle = async (
+  nombre,
+  apellido_paterno,
+  apellido_materno,
+  correo_electronico,
+  google_id,
+  foto_perfil_url
+) => {
   const rol_id = 1;
   const query = `
     INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, correo_electronico, google_id, rol_id, foto_perfil_url)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING usuario_id, nombre, apellido_paterno, apellido_materno, correo_electronico, rol_id, foto_perfil_url, google_id;
   `;
-  const { rows } = await pool.query(query, [nombre, apellido_paterno, apellido_materno, correo_electronico, google_id, rol_id, foto_perfil_url]);
+  const { rows } = await pool.query(query, [
+    nombre,
+    apellido_paterno,
+    apellido_materno,
+    correo_electronico,
+    google_id,
+    rol_id,
+    foto_perfil_url
+  ]);
   return rows[0];
 };
 

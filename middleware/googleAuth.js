@@ -1,5 +1,4 @@
 const { OAuth2Client } = require('google-auth-library');
-require('dotenv').config();
 const logger = require('../utils/logger');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -47,7 +46,7 @@ const googleAuthMiddleware = async (req, res, next) => {
     }
 
     req.googleUser = googleUser;
-    next();
+    return next();
   } catch (error) {
     logger.error(`Error en middleware Google: ${error.message}`);
     return res.status(500).json({

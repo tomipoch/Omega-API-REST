@@ -1,12 +1,11 @@
 const pool = require('../database/pgPool');
+const { withTransaction } = require('../utils/db');
+const { RESERVA } = require('../utils/estados');
 
 const TIEMPO_EXPIRACION_MINUTOS = 30;
 
 exports.reservarProducto = async (usuarioId, productoId, cantidad, tiempoExpMin = TIEMPO_EXPIRACION_MINUTOS) => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-
+  return withTransaction(async (client) => {
     const { rows: [producto] } = await client.query(
       'SELECT producto_id, stock, nombre_producto FROM productos WHERE producto_id = $1 FOR UPDATE',
       [productoId]
@@ -20,8 +19,8 @@ exports.reservarProducto = async (usuarioId, productoId, cantidad, tiempoExpMin 
 
     const { rows: [reserva] } = await client.query(
       `INSERT INTO reservas (usuario_id, producto_id, cantidad_reservada, estado_reserva, fecha_expiracion)
-       VALUES ($1, $2, $3, 'activa', $4) RETURNING *`,
-      [usuarioId, productoId, cantidad, fechaExp]
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [usuarioId, productoId, cantidad, RESERVA.ACTIVA, fechaExp]
     );
 
     const { rows: [productoActualizado] } = await client.query(
@@ -29,48 +28,41 @@ exports.reservarProducto = async (usuarioId, productoId, cantidad, tiempoExpMin 
       [cantidad, productoId]
     );
 
-    await client.query('COMMIT');
     return { reserva, producto: productoActualizado };
-  } catch (e) {
-    await client.query('ROLLBACK');
-    throw e;
-  } finally {
-    client.release();
-  }
+  });
 };
 
 exports.confirmarReserva = async (reservaId, usuarioId) => {
-  const { rows: [reserva] } = await pool.query(
-    `SELECT * FROM reservas
-     WHERE reserva_id = $1 AND usuario_id = $2 AND estado_reserva = 'activa'`,
-    [reservaId, usuarioId]
-  );
-  if (!reserva) throw new Error('Reserva no encontrada o no válida');
-
-  if (new Date() > new Date(reserva.fecha_expiracion)) {
-    await pool.query(
-      `UPDATE reservas SET estado_reserva = 'expirada' WHERE reserva_id = $1`,
-      [reservaId]
+  return withTransaction(async (client) => {
+    const { rows: [reserva] } = await client.query(
+      `SELECT * FROM reservas
+       WHERE reserva_id = $1 AND usuario_id = $2 AND estado_reserva = $3 FOR UPDATE`,
+      [reservaId, usuarioId, RESERVA.ACTIVA]
     );
-    throw new Error('La reserva ha expirado');
-  }
+    if (!reserva) throw new Error('Reserva no encontrada o no válida');
 
-  const { rows: [actualizada] } = await pool.query(
-    `UPDATE reservas SET estado_reserva = 'confirmada' WHERE reserva_id = $1 RETURNING *`,
-    [reservaId]
-  );
-  return actualizada;
+    if (new Date() > new Date(reserva.fecha_expiracion)) {
+      await client.query(
+        `UPDATE reservas SET estado_reserva = $1 WHERE reserva_id = $2`,
+        [RESERVA.EXPIRADA, reservaId]
+      );
+      throw new Error('La reserva ha expirado');
+    }
+
+    const { rows: [actualizada] } = await client.query(
+      `UPDATE reservas SET estado_reserva = $1 WHERE reserva_id = $2 RETURNING *`,
+      [RESERVA.CONFIRMADA, reservaId]
+    );
+    return actualizada;
+  });
 };
 
 exports.cancelarReserva = async (reservaId, usuarioId) => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-
+  return withTransaction(async (client) => {
     const { rows: [reserva] } = await client.query(
       `SELECT * FROM reservas
-       WHERE reserva_id = $1 AND usuario_id = $2 AND estado_reserva = 'activa' FOR UPDATE`,
-      [reservaId, usuarioId]
+       WHERE reserva_id = $1 AND usuario_id = $2 AND estado_reserva = $3 FOR UPDATE`,
+      [reservaId, usuarioId, RESERVA.ACTIVA]
     );
     if (!reserva) throw new Error('Reserva no encontrada o no válida');
 
@@ -80,28 +72,20 @@ exports.cancelarReserva = async (reservaId, usuarioId) => {
     );
 
     const { rows: [actualizada] } = await client.query(
-      `UPDATE reservas SET estado_reserva = 'cancelada' WHERE reserva_id = $1 RETURNING *`,
-      [reservaId]
+      `UPDATE reservas SET estado_reserva = $1 WHERE reserva_id = $2 RETURNING *`,
+      [RESERVA.CANCELADA, reservaId]
     );
 
-    await client.query('COMMIT');
     return actualizada;
-  } catch (e) {
-    await client.query('ROLLBACK');
-    throw e;
-  } finally {
-    client.release();
-  }
+  });
 };
 
 exports.limpiarReservasExpiradas = async () => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-
+  return withTransaction(async (client) => {
     const { rows: expiradas } = await client.query(
       `SELECT reserva_id, producto_id, cantidad_reservada FROM reservas
-       WHERE estado_reserva = 'activa' AND fecha_expiracion < NOW() FOR UPDATE`
+       WHERE estado_reserva = $1 AND fecha_expiracion < NOW() FOR UPDATE`,
+      [RESERVA.ACTIVA]
     );
 
     for (const r of expiradas) {
@@ -110,19 +94,13 @@ exports.limpiarReservasExpiradas = async () => {
         [r.cantidad_reservada, r.producto_id]
       );
       await client.query(
-        `UPDATE reservas SET estado_reserva = 'expirada' WHERE reserva_id = $1`,
-        [r.reserva_id]
+        `UPDATE reservas SET estado_reserva = $1 WHERE reserva_id = $2`,
+        [RESERVA.EXPIRADA, r.reserva_id]
       );
     }
 
-    await client.query('COMMIT');
     return expiradas.length;
-  } catch (e) {
-    await client.query('ROLLBACK');
-    throw e;
-  } finally {
-    client.release();
-  }
+  });
 };
 
 exports.obtenerReservasUsuario = async (usuarioId) => {

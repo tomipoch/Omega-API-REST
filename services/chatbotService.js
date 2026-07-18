@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 const Productos = require('../models/productosModel');
 const logger = require('../utils/logger');
+const { ValidationError } = require('../utils/errors');
 
 // Proveedor IA OpenAI-compatible (OpenAI, MiniMax, Kimi, GLM, etc.)
 // Configurable vía env: AI_BASE_URL, AI_API_KEY, AI_MODEL
@@ -133,7 +134,6 @@ const llamarProveedorIA = async ({ mensaje, systemPrompt, productosContexto }) =
 
 const procesarMensaje = async ({ mensaje }) => {
   if (!mensaje || typeof mensaje !== 'string' || !mensaje.trim()) {
-    const { ValidationError } = require('../utils/errors');
     throw new ValidationError('El mensaje es requerido');
   }
 

@@ -11,7 +11,12 @@ exports.listarTodas = () => citasModel.obtenerTodasLasCitas();
 
 exports.actualizar = async (usuarioId, id, datos) => {
   const cita = await citasModel.actualizarCita(
-    usuarioId, id, datos.fecha_hora, datos.servicio_id, datos.estado_id, datos.notas
+    usuarioId,
+    id,
+    datos.fecha_hora,
+    datos.servicio_id,
+    datos.estado_id,
+    datos.notas
   );
   if (!cita) throw new NotFoundError('Cita no encontrada o no tienes permiso para actualizarla.');
   return cita;

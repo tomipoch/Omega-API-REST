@@ -1,9 +1,10 @@
 const Reservas = require('../models/reservasModel');
-const Productos = require('./productosService');
+const ProductosModel = require('../models/productosModel');
 const Usuarios = require('../models/usuariosModel');
 const auditoria = require('./auditoriaService');
 const emailService = require('./emailService');
-const { NotFoundError, ConflictError, ValidationError } = require('../utils/errors');
+const { ConflictError, ValidationError } = require('../utils/errors');
+const { RESERVA } = require('../utils/estados');
 
 const CANTIDAD_MAXIMA = 10;
 
@@ -18,8 +19,8 @@ exports.reservar = async (usuarioId, productoId, cantidad, tiempoExpiracion = 30
   await Reservas.limpiarReservasExpiradas();
 
   const reservasUsuario = await Reservas.obtenerReservasUsuario(usuarioId);
-  const existente = reservasUsuario.find(r =>
-    r.producto_id === Number(productoId) && r.estado_reserva === 'activa'
+  const existente = reservasUsuario.find(
+    (r) => r.producto_id === Number(productoId) && r.estado_reserva === RESERVA.ACTIVA
   );
   if (existente) {
     throw new ConflictError('Ya tienes una reserva activa para este producto', {
@@ -47,10 +48,9 @@ exports.confirmar = async (reservaId, usuarioId) => {
   const reserva = await Reservas.confirmarReserva(reservaId, usuarioId);
   await auditoria.registrar(usuarioId, 'confirma_reserva', `Confirmó reserva ${reservaId}`);
 
-  // Email de confirmación (no bloqueante)
   try {
     const usuario = await Usuarios.obtenerUsuarioPorId(usuarioId);
-    const producto = await Productos.obtenerPorId(reserva.producto_id);
+    const producto = await ProductosModel.obtenerProductoPorId(reserva.producto_id);
     if (usuario && producto) {
       await emailService.enviarConfirmacionReserva({
         correo: usuario.correo_electronico,
@@ -61,7 +61,7 @@ exports.confirmar = async (reservaId, usuarioId) => {
       });
     }
   } catch (emailError) {
-    // No afecta el flujo principal, solo se registra
+    // Email no afecta el flujo principal
   }
 
   return reserva;
@@ -78,7 +78,7 @@ exports.listarDelUsuario = async (usuarioId) => {
   if (!usuarioId) throw new ValidationError('Usuario no autenticado');
   await Reservas.limpiarReservasExpiradas();
   const reservas = await Reservas.obtenerReservasUsuario(usuarioId);
-  return reservas.map(r => ({
+  return reservas.map((r) => ({
     reserva_id: r.reserva_id,
     cantidad_reservada: r.cantidad_reservada,
     estado_reserva: r.estado_reserva,
@@ -90,6 +90,6 @@ exports.listarDelUsuario = async (usuarioId) => {
       precio: r.precio_producto,
       imagen: r.imagen_producto
     },
-    esta_activa: r.estado_reserva === 'activa' && new Date() < new Date(r.fecha_expiracion)
+    esta_activa: r.estado_reserva === RESERVA.ACTIVA && new Date() < new Date(r.fecha_expiracion)
   }));
 };

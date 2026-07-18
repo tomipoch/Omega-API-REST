@@ -1,6 +1,5 @@
-const pool = require('../database/pgPool');  // Archivo donde se configura la conexión a PostgreSQL
+const pool = require('../database/pgPool');
 
-// Crear una nueva cita
 exports.crearCita = async (usuarioId, fecha_hora, servicio_id, estado_id, notas) => {
   const query = `
     INSERT INTO citas (usuario_id, fecha_hora, servicio_id, estado_id, notas)
@@ -11,14 +10,12 @@ exports.crearCita = async (usuarioId, fecha_hora, servicio_id, estado_id, notas)
   return rows[0];
 };
 
-// Obtener citas de un usuario
 exports.obtenerCitas = async (usuarioId) => {
   const query = 'SELECT * FROM citas WHERE usuario_id = $1';
   const { rows } = await pool.query(query, [usuarioId]);
   return rows;
 };
 
-// Obtener TODAS las citas con el nombre del cliente (para el admin)
 exports.obtenerTodasLasCitas = async () => {
   const query = `
     SELECT c.*, u.nombre AS cliente_nombre
@@ -30,25 +27,49 @@ exports.obtenerTodasLasCitas = async () => {
   return rows;
 };
 
-// Actualizar una cita
 exports.actualizarCita = async (usuarioId, citaId, fecha_hora, servicio_id, estado_id, notas) => {
+  const campos = [];
+  const valores = [];
+  let i = 1;
+
+  if (fecha_hora !== undefined) {
+    campos.push(`fecha_hora = $${i++}`);
+    valores.push(fecha_hora);
+  }
+  if (servicio_id !== undefined) {
+    campos.push(`servicio_id = $${i++}`);
+    valores.push(servicio_id);
+  }
+  if (estado_id !== undefined) {
+    campos.push(`estado_id = $${i++}`);
+    valores.push(estado_id);
+  }
+  if (notas !== undefined) {
+    campos.push(`notas = $${i++}`);
+    valores.push(notas);
+  }
+
+  if (!campos.length) {
+    const { rows } = await pool.query(
+      'SELECT * FROM citas WHERE cita_id = $1 AND usuario_id = $2',
+      [citaId, usuarioId]
+    );
+    return rows[0];
+  }
+
+  valores.push(citaId);
+  valores.push(usuarioId);
+
   const query = `
-    UPDATE citas 
-    SET 
-      fecha_hora = COALESCE($1, NOW()), -- Usa NOW() si $1 es nulo
-      servicio_id = $2, 
-      estado_id = $3, 
-      notas = $4
-    WHERE 
-      cita_id = $5 AND usuario_id = $6 
+    UPDATE citas
+    SET ${campos.join(', ')}
+    WHERE cita_id = $${i++} AND usuario_id = $${i}
     RETURNING *;
   `;
-  const values = [fecha_hora, servicio_id, estado_id, notas, citaId, usuarioId];
-  const { rows } = await pool.query(query, values);
+  const { rows } = await pool.query(query, valores);
   return rows[0];
 };
 
-// Eliminar una cita
 exports.eliminarCita = async (usuarioId, citaId) => {
   const query = 'DELETE FROM citas WHERE cita_id = $1 AND usuario_id = $2 RETURNING *;';
   const { rows } = await pool.query(query, [citaId, usuarioId]);

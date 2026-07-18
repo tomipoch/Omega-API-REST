@@ -2,14 +2,13 @@ const blogModel = require('../models/blogModel');
 const { NotFoundError } = require('../utils/errors');
 
 exports.crear = async (autorId, datos) => {
-  const publicacion = await blogModel.crearPublicacion(autorId, datos.titulo, datos.contenido);
-  if (datos.secciones?.length) {
-    const validas = datos.secciones.filter(s => s.subtitulo && s.contenido);
-    if (validas.length) {
-      await blogModel.crearSecciones(publicacion.publicacion_id, validas);
-    }
-  }
-  return publicacion;
+  const secciones = (datos.secciones || []).filter((s) => s.subtitulo && s.contenido);
+  return blogModel.crearPublicacionConSecciones(
+    autorId,
+    datos.titulo,
+    datos.contenido,
+    secciones
+  );
 };
 
 exports.listarPaginadas = async (limit, page) => {
@@ -31,15 +30,14 @@ exports.obtenerPorId = async (id) => {
 };
 
 exports.actualizar = async (id, datos) => {
-  const actualizada = await blogModel.actualizarPublicacion(id, datos.titulo, datos.contenido);
+  const secciones = (datos.secciones || []).filter((s) => s.subtitulo && s.contenido);
+  const actualizada = await blogModel.actualizarPublicacionConSecciones(
+    id,
+    datos.titulo,
+    datos.contenido,
+    secciones
+  );
   if (!actualizada) throw new NotFoundError('Publicación no encontrada.');
-  await blogModel.eliminarSeccionesPorPublicacionId(id);
-  if (datos.secciones?.length) {
-    const validas = datos.secciones.filter(s => s.subtitulo && s.contenido);
-    if (validas.length) {
-      await blogModel.crearSecciones(id, validas);
-    }
-  }
   return actualizada;
 };
 
